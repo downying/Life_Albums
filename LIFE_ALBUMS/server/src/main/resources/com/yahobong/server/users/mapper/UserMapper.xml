@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yahobong.server.users.mapper.UserMapper">
+    <resultMap type="Users" id="userMap">
+        <id property="userNo" column="userNo" javaType="Integer"/>
+        <result property="id" column="id" />
+        <result property="pw" column="pw" />
+        <result property="name" column="name" />
+        <result property="mail" column="mail" />
+        <result property="phone" column="phone" javaType="String"/> 
+        <result property="resetToken" column="resetToken" javaType="String"/> 
+        <result property="resetTokenExpiry" column="resetTokenExpiry" javaType="java.util.Date"/> 
+    </resultMap>
+
+    <!-- 로그인 -->
+    <select id="login" resultMap="userMap">
+        SELECT userNo, id, pw, name, mail, phone
+        FROM users
+        WHERE id = #{id} AND pw = #{pw}
+    </select>
+
+    <!-- 회원가입 -->
+    <insert id="join">
+        INSERT INTO users {id, pw, name, mail, phone}
+        VALUES (#{id},
+                #{pw},
+                #{name},
+                #{mail},
+                #{phone})
+    </insert>
+
+    <!-- 아이디 중복 체크 -->
+    <select id="checkId" resultType="int">
+        SELECT COUNT(*)
+        FROM users
+        WHERE id = #{id}
+    </select>
+
+    <!-- 이메일 중복 체크 -->
+    <select id="checkMail" resultType="int">
+        SELECT COUNT(*)
+        FROM mail
+        WHERE mail = #{mail}
+    </select>
+
+    <!-- 아이디 찾기 -->
+    <select id="findId" resultType="string">
+        SELECT id
+        FROM users
+        WHERE name = #{name}
+          AND mail = #{mail}
+          AND phone = #{phone}
+    </select>
+
+    <!-- 비밀번호 찾기 1. 인증번호 생성 및 저장 -->
+    <!-- reset_token:        생성된 인증번호를 저장
+         reset_token_expiry: 인증번호의 만료 시간을 현재 시간에서 5분 후로 설정-->
+    <update id="generateResetToken">
+        UPDATE users
+          SET reset_token = #{resetToken}, 
+              reset_token_expiry = DATE_ADD(NOW(), INTERVAL 5 MINUTE)
+        WHERE id = #{id} 
+          AND name = #{name} 
+          AND mail = #{mail}
+    </update>
+
+    <!-- 비밀번호 찾기 2. 인증번호 검증 -->
+    <!-- 결과가 1이면 인증 성공
+         결과가 0이면 인증 실패 -->
+    <select id="verifyResetToken" resultType="int">
+        SELECT COUNT(*)
+        FROM users
+        WHERE id = #{id}
+          AND reset_token = #{resetToken}
+          AND reset_token_expiry > NOW()
+    </select>
+    
+    <!-- 비밀번호 찾기 3. 비밀번호 변경 페이지로 이동 -->
+    <!-- 인증이 성공했을 때, 비밀번호를 변경할 수 있도록 기존의 인증번호를 무효화하는 쿼리
+         reset_token과 reset_token_expiry를 NULL로 설정하여 인증번호를 무효화
+         쿼리를 실행후, 비밀번호 변경 페이지로 리다이렉트-->
+    <update id="clearResetToken">
+        UPDATE users
+        SET reset_token = NULL, 
+            reset_token_expiry = NULL
+        WHERE id = #{id} 
+        AND reset_token = #{resetToken}
+    </update>
+
+    <!-- 비밀번호 찾기 4. 비밀번호 변경 페이지로 이동 -->
+    <update id="updatePw">
+        UPDATE users
+        SET pw = #{pw}  
+        WHERE id = #{id}
+    </update>
+
+</mapper>
+
