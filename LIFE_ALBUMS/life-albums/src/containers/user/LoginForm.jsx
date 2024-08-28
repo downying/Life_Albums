@@ -2,6 +2,7 @@ import React from 'react';
 import Input from '../../components/user/Input';
 import Checkbox from '../../components/user/Checkbox';
 import Button from '../../components/user/Button';
+import { Link } from 'react-router-dom';
 
 const LoginForm = () => {
   return (
@@ -14,17 +15,17 @@ const LoginForm = () => {
         <div className="mb-4">
           <Input type="password" placeholder="PASSWORD" />
         </div>
-        <div className="mb-4">
-          <Checkbox label="아이디 저장" />
+        <div className="mb-4 flex justify-center items-center"> 
+          <Checkbox label="아이디 저장" className="text-sm" /> 
         </div>
         <div className="mb-4">
           <Button text="로그인" />
         </div>
       </form>
-      <div className="text-center text-sm text-gray-600">
-        <a href="/" className="mr-2">아이디 찾기</a> | 
-        <a href="/" className="ml-2 mr-2">비밀번호 찾기</a> | 
-        <a href="/" className="ml-2">회원가입</a>
+      <div className="text-center text-[0.8125rem] text-gray-600"> {/* Custom text size */}
+        <Link to="/" className="mr-1">아이디 찾기</Link> | 
+        <Link to="/" className="ml-1 mr-1">비밀번호 찾기</Link> | 
+        <Link to="/" className="ml-1">회원가입</Link>
       </div>
     </div>
   );
