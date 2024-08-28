@@ -14,7 +14,7 @@ CREATE TABLE `users` (
 CREATE TABLE `albums` (
     `albumsNo`  INT           NOT NULL AUTO_INCREMENT,
     `userNo`    INT           NOT NULL,
-    `title`     VARCHAR(100)  NOT NULL,
+    `title`     VARCHAR(100)  NULL,
     PRIMARY KEY (`albumsNo`),
     FOREIGN KEY (`userNo`) REFERENCES `users`(`userNo`) ON UPDATE CASCADE ON DELETE CASCADE
 ) COMMENT='앨범';
@@ -22,11 +22,11 @@ CREATE TABLE `albums` (
 CREATE TABLE `files` (
     `fileNo`    INT            NOT NULL AUTO_INCREMENT,
     `albumsNo`  INT            NOT NULL,
-    `content`   VARCHAR(255)   NOT NULL,
-    `year`      INT            NOT NULL,
-    `month`     INT            NOT NULL,
-    `day`       INT            NOT NULL,
-    `star`      ENUM('0', '1') NOT NULL,
+    `content`   VARCHAR(255)   NULL,
+    `year`      INT            NULL,
+    `month`     INT            NULL,
+    `day`       INT            NULL,
+    `star`      ENUM('0', '1') NULL,
     `regDate`   TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`fileNo`),
     FOREIGN KEY (`albumsNo`) REFERENCES `albums`(`albumsNo`) ON UPDATE CASCADE ON DELETE CASCADE
