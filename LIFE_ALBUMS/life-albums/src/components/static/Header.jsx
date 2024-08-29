@@ -14,7 +14,7 @@ const Header = () => {
             </Link>
             <div>
                 <Link to="/login" className="text-white text-sm mr-4">로그인</Link> 
-                <Link to="/signup" className="text-white text-sm">회원가입</Link> 
+                <Link to="/join" className="text-white text-sm">회원가입</Link> 
             </div>
         </header>
     );
