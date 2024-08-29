@@ -12,3 +12,10 @@ npx tailwindcss init
 
 ## react-router-dom 설치
 npm install react-router-dom
+
+## FontAwesome 설치
+npm install --save @fortawesome/react-fontawesome @fortawesome/free-solid-svg-icons @fortawesome/free-regular-svg-icons @fortawesome/fontawesome-svg-core
+
+## react-datepicker 설치
+npm install react-datepicker date-fns
+
