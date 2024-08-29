@@ -2,16 +2,22 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
 import LoginPage from './pages/user/LoginPage';
 import JoinPage from './pages/user/JoinPage';
+import AlbumsPage from './pages/albums/AlbumsPage';
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
         <Routes>
-          {/* 기본 경로는 LoginPage로 라우팅 */}
+          {/* 메인 페이지 */}
           <Route path="/" element={<LoginPage />} />
-          {/* /join 경로로 JoinPage를 라우팅 */}
+          
+          {/* 로그인 */}
           <Route path="/join" element={<JoinPage />} />
+          
+          {/* 앨범  */}
+          <Route path="/album" element={<AlbumsPage/>} />
+
         </Routes>
       </BrowserRouter>
     </div>
