@@ -1,12 +1,14 @@
 import React from 'react';
 
-const Input = ({ label, type, placeholder, checkLabel }) => {
+const Input = ({ label, type, placeholder, checkLabel, value, onChange }) => {
   return (
     <div className="relative w-full">
       <input 
         type={type} 
         placeholder={placeholder} 
-        className="border p-2 w-full rounded-md pr-24" // 오른쪽에 충분한 패딩을 줍니다.
+        className="border p-2 w-full rounded-md pr-24"
+        value={value}  
+        onChange={onChange}  
       />
       {checkLabel && (
         <button 

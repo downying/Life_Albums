@@ -12,3 +12,8 @@ npx tailwindcss init
 
 ## react-router-dom 설치
 npm install react-router-dom
+
+## axios 설치
+npm install axios
+
+npm install js-cookie
