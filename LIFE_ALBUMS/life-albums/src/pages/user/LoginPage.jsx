@@ -17,8 +17,8 @@ const LoginPage = () => {
               
               {/* 하단 페이지 효과 */}
               <div className="absolute bottom-0 left-0 w-full h-12 bg-gray-100 border-t-4 border-black rounded-b-3xl"></div>
-              <div className="absolute bottom-4 left-0 w-4/5 h-2 bg-black"></div>
-              <div className="absolute bottom-6 left-0 w-3/4 h-2 bg-black"></div>
+              <div className="absolute bottom-2 right-0 w-5/6 h-2 bg-black rounded-l"></div>
+              <div className="absolute bottom-7 right-0 w-5/6 h-2 bg-black rounded-l"></div>
             </div>
 
             {/* 로그인 폼 */}
