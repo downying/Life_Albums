@@ -36,37 +36,30 @@ public class UserServiceImpl implements UserService{
         String id = user.getId();
         String pw = user.getPw();
 
-        // 아이디, 비밀번호 인증 토큰 생성
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(id, pw);
+        log.info("로그인 시도 - ID: " + id);
+
+        // DB에서 사용자 정보 로드 (userMapper의 로그인 쿼리를 호출)
+        Users dbUser = userMapper.login(id);  // ID만으로 사용자 정보 조회
         
-        try {
-            // 토큰을 이용하여 인증
-            Authentication authentication = authenticationManager.authenticate(token);
-            
-            // 인증된 사용자 확인
-            CustomUser loginUser = (CustomUser) authentication.getPrincipal();
-            log.info("인증된 사용자 아이디 : " + loginUser.getUser().getId());
-            
-            // 시큐리티 컨텍스트에 등록
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            
-            // 토큰에 요청정보를 등록
-            // token.setDetails( new WebAuthenticationDetails(requset) );
-
-            // 토큰을 이용하여 인증(로그인)
-            // Authentication authentication = authenticationManager.authenticate(token);
-
-    
-            // 클라이언트에게 JWT 토큰 반환 (헤더 설정 등)
-            // 예: HttpServletResponse response를 이용하여 설정
-            // response.setHeader("Authorization", "Bearer " + jwtToken);
-            
-            return true;
-        } catch (Exception e) {
-            log.error("로그인 실패: " + e.getMessage());
+        // 사용자 존재 여부 확인
+        if (dbUser == null) {
+            log.error("사용자를 찾을 수 없습니다. ID: " + id);
             return false;
         }
+
+        log.info("DB에 저장된 암호화된 비밀번호: " + dbUser.getPw());
+
+        // 입력된 비밀번호와 DB에 저장된 암호화된 비밀번호 비교
+        if (!passwordEncoder.matches(pw, dbUser.getPw())) {
+            log.error("비밀번호가 일치하지 않습니다.");
+            return false;
+        }
+
+        // 인증 성공
+        log.info("인증 성공 - ID: " + id);
+        return true;
     }
+
         
 
     /**
