@@ -6,7 +6,7 @@ const Header = () => {
         <header className="bg-black text-white py-4 px-8 flex justify-between items-center">
             <div className="flex items-center">
                 <Link to="/">
-                    <img src="/img/헤더 로고 아이콘_누끼.png" alt="Logo" className="h-12 w-12 mr-4" />
+                    <img src="/img/logo.png" alt="Logo" className="h-12 w-12 mr-4" />
                 </Link>
             </div>
             <Link to="/" className="text-lg font-bold text-center flex-grow">
