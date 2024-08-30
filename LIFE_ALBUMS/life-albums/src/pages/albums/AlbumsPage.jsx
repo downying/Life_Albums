@@ -8,19 +8,42 @@ import Footer from '../../components/static/Footer';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Link } from 'react-router-dom';
+import Pagination from '../../components/albums/Pagenation';
 
 const AlbumsPage = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const albumsPerPage = 1; // 왼쪽에 하나의 사진만 표시
+
+  // 임시 데이터로 1개의 앨범이 있다고 가정
+  const albums = new Array(1).fill({
+    date: '2024-08-24',
+    imgSrc: '/img/example.jpg',
+  });
+
+  const totalPages = Math.ceil(albums.length / albumsPerPage);
 
   const handleCalendarClick = () => {
     setShowDatePicker(!showDatePicker);
   };
 
+  // 현재 페이지의 앨범 가져오기
+  const indexOfLastAlbum = currentPage * albumsPerPage;
+  const indexOfFirstAlbum = indexOfLastAlbum - albumsPerPage;
+  const currentAlbum = albums.slice(indexOfFirstAlbum, indexOfLastAlbum)[0];
+
+  const onPageChange = (pageNumber) => {
+    // 페이지 이동이 1에서 벗어나지 않도록 함
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen relative">
       <Header /> {/* 헤더 추가 */}
-      <div className="flex-grow flex items-center justify-center bg-gray-100 p-4">
+      <div className="flex-grow flex flex-col items-center justify-center bg-gray-100 p-4">
         <div className="relative flex items-center">
           {/* 네비게이션 버튼과 앨범을 하나로 묶기 */}
           <div className="relative flex items-center">
@@ -42,10 +65,10 @@ const AlbumsPage = () => {
                 {/* 왼쪽 페이지 */}
                 <div className="relative w-1/2 h-full bg-white flex flex-col justify-center items-center border-r-4 border-black p-6 shadow-inner">
                   <div className="relative">
-                    <img src="/img/example.jpg" alt="Example" className="w-[250px] h-[350px] object-cover rounded-lg shadow-md" />
+                    <img src={currentAlbum.imgSrc} alt="Example" className="w-[250px] h-[350px] object-cover rounded-lg shadow-md" />
                     <div className="flex items-center mt-4">
                       <FontAwesomeIcon icon={faHeart} className="text-red-500 mr-2" />
-                      <span className="text-sm">2024-08-24</span>
+                      <span className="text-sm">{currentAlbum.date}</span>
                     </div>
                   </div>
                 </div>
@@ -91,7 +114,13 @@ const AlbumsPage = () => {
             )}
           </div>
         </div>
+
+        {/* Pagination 컴포넌트 추가 */}
+        <div className="mt-8">
+          <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={onPageChange} />
+        </div>
       </div>
+      
       <Footer /> {/* 푸터 추가 */}
     </div>
   );
