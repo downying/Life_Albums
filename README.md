@@ -14,9 +14,10 @@ npx tailwindcss init
 npm install react-router-dom
 
 
-## axios 설치
+## axios 설치 - life-albums 통합터미널에서
 npm install axios
 
+## js-cookie 설치 - life-albums 통합터미널에서
 npm install js-cookie
 
 ## FontAwesome 설치
@@ -25,5 +26,5 @@ npm install --save @fortawesome/react-fontawesome @fortawesome/free-solid-svg-ic
 ## react-datepicker 설치
 npm install react-datepicker date-fns
 
-## 왜 안되니???
+
 
