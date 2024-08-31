@@ -29,7 +29,7 @@ const LoginForm = () => {
 
         if (response.data) {
             alert('로그인 성공');
-            window.location.href = '/dashboard';
+            window.location.href = '/album';
         } else {
             setError('로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.');
         }
