@@ -1,7 +1,11 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; 
+import { LoginContext } from '../../components/LoginProvider'; 
 
 const Header = () => {
+    const { isLoggedIn, logout } = useContext(LoginContext);
+    const navigate = useNavigate();
+
     return (
         <header className="bg-black text-white py-4 px-8 flex justify-between items-center">
             <div className="flex items-center">
@@ -13,8 +17,14 @@ const Header = () => {
                 <h1>LIFE ALBUMS</h1>
             </Link>
             <div>
-                <Link to="/" className="text-white text-sm mr-4">로그인</Link> 
-                <Link to="/join" className="text-white text-sm">회원가입</Link> 
+                {isLoggedIn ? (
+                    <button onClick={() => logout(navigate)} className="text-white text-sm">로그아웃</button>
+                ) : (
+                    <>
+                        <Link to="/login" className="text-white text-sm mr-4">로그인</Link>
+                        <Link to="/join" className="text-white text-sm">회원가입</Link>
+                    </>
+                )}
             </div>
         </header>
     );

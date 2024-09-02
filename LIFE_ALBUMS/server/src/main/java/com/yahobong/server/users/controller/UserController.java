@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
@@ -26,6 +27,8 @@ import com.yahobong.server.users.dto.Users;
 import com.yahobong.server.users.dto.CustomUser;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Slf4j
 @Controller
@@ -80,4 +83,29 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.");
         }
     }
+
+    /**
+     * 사용자 정보 조회
+     * @param customUser
+     * @return
+     */
+    @GetMapping("/info")
+    public ResponseEntity<?> userInfo(@AuthenticationPrincipal CustomUser customUser) {
+        
+        log.info("::::: customUser :::::");
+        log.info("customUser : "+ customUser);
+
+        Users user = customUser.getUser();
+        log.info("user : " + user);
+
+        // 인증된 사용자 정보 
+        if( user != null ) {
+            log.info("인증성공");
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        }
+
+        // 인증 되지 않음
+        return new ResponseEntity<>("UNAUTHORIZED", HttpStatus.UNAUTHORIZED);
+    }
+    
 }
