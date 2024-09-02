@@ -1,12 +1,9 @@
 import React from 'react';
 import JoinForm from '../../containers/user/JoinForm';
-import Header from '../../components/static/Header';
-import Footer from '../../components/static/Footer';
 
 const JoinPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header /> {/* 헤더 추가 */}
       <div className="flex-grow bg-gray-100 flex flex-col justify-center p-4">
         {/* "JOIN" 텍스트의 위치와 크기를 조정 */}
         <h1 className="text-center text-4xl font-bold text-black-900 mb-2 mt-8">JOIN</h1> {/* mb-2로 수정 */}
@@ -19,7 +16,6 @@ const JoinPage = () => {
           </p>
         </div>
       </div>
-      <Footer /> {/* 푸터 추가 */}
     </div>
   );
 };

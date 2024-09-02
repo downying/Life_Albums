@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import Header from '../../components/static/Header';
-import Footer from '../../components/static/Footer';
 import DayCell from '../../components/calender/DayCell';
 import Sidebar from '../../components/albums/Sidebar';
 
@@ -53,7 +51,6 @@ const CalenderPage = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100"> {/* Match background */}
-      <Header />
       <div className="flex flex-grow">
         <Sidebar /> {/* 사이드바 추가 */}
         <div className="flex-grow flex mt-4 mb-4"> {/* Add margin between header and footer */}
@@ -88,7 +85,6 @@ const CalenderPage = () => {
           </main>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };
