@@ -1,12 +1,9 @@
 import React from 'react';
 import LoginForm from '../../containers/user/LoginForm';
-import Header from '../../components/static/Header';
-import Footer from '../../components/static/Footer';
 
 const LoginPage = () => {
     return (
       <div className="flex flex-col min-h-screen">
-        <Header /> {/* 헤더 추가 */}
         <div className="flex-grow flex items-center justify-center bg-gray-100">
           <div className="relative w-[600px] h-[500px]"> {/* 세로 길이를 500px로 늘림 */}
             {/* 앨범 모양 */}
@@ -29,7 +26,6 @@ const LoginPage = () => {
             </div>
           </div>
         </div>
-        <Footer /> {/* 푸터 추가 */}
       </div>
     );
   };

@@ -3,8 +3,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import NavigationButton from '../../components/albums/NavigationButton';
 import AddPhotoButton from '../../components/albums/AddPhotoButton';
-import Header from '../../components/static/Header';
-import Footer from '../../components/static/Footer';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Link } from 'react-router-dom';
@@ -41,7 +39,7 @@ const AlbumsPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen relative">
-      <Header /> {/* 헤더 추가 */}
+   
       
       <div className="flex flex-grow">
         <Sidebar /> {/* 사이드바 추가 */}
@@ -113,7 +111,7 @@ const AlbumsPage = () => {
         </div>
       </div>
 
-      <Footer /> {/* 푸터 추가 */}
+
     </div>
   );
 };
