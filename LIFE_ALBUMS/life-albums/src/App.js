@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useNavigate, useLocation } from 'react-router-dom'; 
 import './App.css';
 import LoginPage from './pages/user/LoginPage';
 import JoinPage from './pages/user/JoinPage';
@@ -24,14 +24,19 @@ function App() {
 const AppRoutes = () => {
   const { isLoggedIn } = useContext(LoginContext);
   const navigate = useNavigate();
+  const currentLocation = useLocation(); // location을 다른 변수 이름으로 변경
 
   useEffect(() => {
-    if (isLoggedIn) {
-      navigate('/album');
-    } else {
-      navigate('/login');
+    // 회원가입 페이지는 예외로 처리
+    if (currentLocation.pathname !== '/join') {
+      if (isLoggedIn) {
+        navigate('/album');
+      } else {
+        navigate('/login');
+      }
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate, currentLocation.pathname]);
+
 
   return (
     <Routes>
