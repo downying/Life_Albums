@@ -1,44 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; 
+import { LoginContext } from '../../components/LoginProvider'; 
 import Input from '../../components/user/Input';
 import Checkbox from '../../components/user/Checkbox';
 import Button from '../../components/user/Button';
-import { Link } from 'react-router-dom';
-import api from '../../apis/axios';  
-import Cookies from 'js-cookie';  // 쿠키 관리 라이브러리
 
 const LoginForm = () => {
-  const [id, setId] = useState('');  // ID 상태
-  const [pw, setPw] = useState('');  // 비밀번호 상태
-  const [rememberId, setRememberId] = useState(false);  // 아이디 저장 체크 여부
-  const [error, setError] = useState(null);  // 에러 상태
+  const [id, setId] = useState('');
+  const [pw, setPw] = useState('');
+  const [rememberId, setRememberId] = useState(false);
+  const { login, error } = useContext(LoginContext);
+  const navigate = useNavigate();
 
-  // 컴포넌트가 마운트될 때 쿠키에서 ID를 가져옴
-  useEffect(() => {
-    const savedId = Cookies.get('remember-id');  // 쿠키에서 'remember-id'를 가져옴
-    if (savedId) {
-      setId(savedId);  // ID를 상태에 설정
-      setRememberId(true);  // 아이디 저장 체크박스 상태 설정
-    }
-  }, []);
-
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
-
-    try {
-        const response = await api.post('/users/login', { id, pw });
-
-        if (response.data) {
-            alert('로그인 성공');
-            window.location.href = '/album';
-        } else {
-            setError('로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.');
-        }
-    } catch (err) {
-        console.error(err);
-        setError('서버와의 통신 중 오류가 발생했습니다.');
-    }
+    login(id, pw, rememberId, navigate);
   };
-
 
   return (
     <div className="w-full max-w-xs mx-auto">

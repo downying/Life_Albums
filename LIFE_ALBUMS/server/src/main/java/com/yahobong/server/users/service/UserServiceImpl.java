@@ -60,6 +60,14 @@ public class UserServiceImpl implements UserService{
         return true;
     }
 
+    /**
+     * 회원 조회
+     */
+    @Override
+    public Users select(String id) throws Exception {
+        Users user = userMapper.select(id);
+        return user;
+    }
         
 
     /**
@@ -112,5 +120,9 @@ public class UserServiceImpl implements UserService{
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'updatePw'");
     }
+
+
+
+    
     
 }

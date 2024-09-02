@@ -24,6 +24,13 @@
         WHERE id = #{id} 
     </select>
 
+    <!-- 회원 조회 -->
+    <select id="select" resultMap="userMap">
+        SELECT userNo, id, pw, name, mail, phone   
+        FROM users
+        WHERE id = #{id} 
+    </select>
+
     <!-- 회원가입 -->
     <insert id="join">
         INSERT INTO users (id, pw, name, mail, phone)
