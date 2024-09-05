@@ -1,5 +1,8 @@
 package com.yahobong.server.users.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
@@ -106,6 +109,69 @@ public class UserController {
 
         // 인증 되지 않음
         return new ResponseEntity<>("UNAUTHORIZED", HttpStatus.UNAUTHORIZED);
+    }
+
+    // 아이디 중복 확인
+    @GetMapping("/checkId")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> checkDuplicateId(@RequestParam String userId) throws Exception {
+        boolean exists = userService.checkId(userId);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    // 이메일 중복 확인
+    @GetMapping("/checkMail")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> checkDuplicateEmail(@RequestParam String email) throws Exception {
+        boolean exists = userService.checkMail(email);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * 회원가입
+     * @param user
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/join")
+    public ResponseEntity<?> join(@RequestBody Users user) throws Exception {
+        log.info("[POST] - /users/join");
+
+        // 이미 존재하는 아이디 및 이메일 확인
+        if (userService.checkId(user.getId())) {
+            log.info("이미 존재하는 아이디: {}", user.getId());
+            return new ResponseEntity<>("이미 존재하는 아이디입니다.", HttpStatus.CONFLICT); // 409 Conflict
+        }
+
+        if (userService.checkMail(user.getMail())) {
+            log.info("이미 존재하는 이메일: {}", user.getMail());
+            return new ResponseEntity<>("이미 존재하는 이메일입니다.", HttpStatus.CONFLICT); // 409 Conflict
+        }
+
+        // 회원가입 처리
+        int result = userService.join(user);
+        if (result > 0) {
+            log.info("회원가입 성공! - SUCCESS");
+            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        } else {
+            log.info("회원가입 실패! - FAIL");
+            return new ResponseEntity<>("회원가입 실패", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
+
+    // 회원가입 완료 페이지 또는 후처리
+    @GetMapping("/joinDone")
+    public ResponseEntity<?> joinDone() {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "회원가입이 완료되었습니다.");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
 }

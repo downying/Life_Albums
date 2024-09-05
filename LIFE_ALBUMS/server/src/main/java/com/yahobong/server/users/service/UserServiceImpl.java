@@ -2,14 +2,8 @@ package com.yahobong.server.users.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import com.yahobong.server.users.dto.CustomUser;
 import com.yahobong.server.users.dto.Users;
 import com.yahobong.server.users.mapper.UserMapper;
 
@@ -61,34 +55,55 @@ public class UserServiceImpl implements UserService{
     }
 
     /**
-     * 회원 조회
+     * 회원 조회 - id
      */
     @Override
-    public Users select(String id) throws Exception {
-        Users user = userMapper.select(id);
+    public Users selectById(String id) throws Exception {
+        Users user = userMapper.selectById(id);
         return user;
     }
-        
+
+    /**
+     * 회원 조회 - mail
+     */
+    @Override
+    public Users selectByEmail(String mail) throws Exception {
+        Users user = userMapper.selectByEmail(mail);
+        return user;
+    }
+
+    
 
     /**
      * 회원 가입
      */
     @Override
     public int join(Users user) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'join'");
+        if (checkId(user.getId())) {
+            throw new Exception("이미 존재하는 아이디입니다.");
+        }
+        if (checkMail(user.getMail())) {
+            throw new Exception("이미 존재하는 이메일입니다.");
+        }
+    
+        // 암호화된 비밀번호 설정
+        String encodedPassword = passwordEncoder.encode(user.getPw());
+        user.setPw(encodedPassword);
+    
+        // 회원 등록
+        return userMapper.join(user);
     }
 
     @Override
     public boolean checkId(String id) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'checkId'");
+        Users user = userMapper.selectById(id);
+        return user != null;
     }
 
     @Override
     public boolean checkMail(String mail) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'checkMail'");
+        Users user = userMapper.selectByEmail(mail);
+        return user != null;
     }
 
     @Override
@@ -120,6 +135,8 @@ public class UserServiceImpl implements UserService{
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'updatePw'");
     }
+
+    
 
 
 
