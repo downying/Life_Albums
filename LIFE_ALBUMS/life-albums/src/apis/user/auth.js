@@ -10,14 +10,8 @@ export const info = () => api.get(`/users/info`);
 export const join = (data) => api.post(`/users/join`, data);
 
 // 아이디 중복 확인
-export const checkId = async (id) => {
-    try {
-        const response = await api.get(`/users/checkId`, { params: { userId: id } });
-        return response.data.exists;  // 서버에서 반환한 'exists' 값 사용
-    } catch (error) {
-        console.error('ID 중복 확인 오류:', error);
-        throw error;
-    }
+export const checkId = (id) => {
+    return api.get(`/users/checkId?id=${id}`);
 };
 
 // 이메일 중복 확인

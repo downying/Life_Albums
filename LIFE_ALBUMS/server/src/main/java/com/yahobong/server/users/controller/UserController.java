@@ -114,8 +114,8 @@ public class UserController {
     // 아이디 중복 확인
     @GetMapping("/checkId")
     @ResponseBody
-    public ResponseEntity<Map<String, Boolean>> checkDuplicateId(@RequestParam String userId) throws Exception {
-        boolean exists = userService.checkId(userId);
+    public ResponseEntity<Map<String, Boolean>> checkDuplicateId(@RequestParam String id) throws Exception {
+        boolean exists = userService.checkId(id);
         Map<String, Boolean> response = new HashMap<>();
         response.put("exists", exists);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -124,8 +124,8 @@ public class UserController {
     // 이메일 중복 확인
     @GetMapping("/checkMail")
     @ResponseBody
-    public ResponseEntity<Map<String, Boolean>> checkDuplicateEmail(@RequestParam String email) throws Exception {
-        boolean exists = userService.checkMail(email);
+    public ResponseEntity<Map<String, Boolean>> checkDuplicateEmail(@RequestParam String mail) throws Exception {
+        boolean exists = userService.checkMail(mail);
         Map<String, Boolean> response = new HashMap<>();
         response.put("exists", exists);
         return new ResponseEntity<>(response, HttpStatus.OK);

@@ -17,8 +17,7 @@ const JoinForm = () => {
   const [phone, setPhone] = useState('');
   const [rememberId, setRememberId] = useState(false);
 
-  // idExists와 mailExists의 초기값을 null로 설정
-  const [idExists, setIdExists] = useState(null); 
+  const [idExists, setIdExists] = useState(null);
   const [mailExists, setMailExists] = useState(null);
   const [formError, setFormError] = useState('');
 
@@ -64,14 +63,19 @@ const JoinForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 중복 확인을 하지 않았으면 경고 메시지 출력
+    // ID 중복 확인을 아직 하지 않았다면 강제 실행
     if (idExists === null) {
-      alert('ID 중복 확인을 해주세요.');
-      return;
+      await handleCheckId();
+      if (idExists === null || idExists === true) {
+        return; // ID 중복 확인 후, 중복이 있거나 확인되지 않았으면 종료
+      }
     }
+
     if (mailExists === null) {
-      alert('이메일 중복 확인을 해주세요.');
-      return;
+      await handleCheckMail();
+      if (mailExists === null || mailExists === true) {
+        return; // 이메일 중복 확인 후, 중복이 있거나 확인되지 않았으면 종료
+      }
     }
 
     // 전체 폼 유효성 검사
@@ -116,7 +120,10 @@ const JoinForm = () => {
           type="text"
           placeholder="ID"
           value={id}
-          onChange={(e) => setId(e.target.value)}
+          onChange={(e) => {
+            setId(e.target.value);
+            setIdExists(null); // ID가 변경되면 중복 확인 초기화
+          }}
           checkLabel="중복 확인"
           onCheck={handleCheckId} // 중복 확인 버튼이 handleCheckId 호출
         />
@@ -162,7 +169,10 @@ const JoinForm = () => {
           type="email"
           placeholder="E-MAIL"
           value={mail}
-          onChange={(e) => setMail(e.target.value)}
+          onChange={(e) => {
+            setMail(e.target.value);
+            setMailExists(null); // 이메일이 변경되면 중복 확인 초기화
+          }}
           checkLabel="중복 확인"
           onCheck={handleCheckMail} // 중복 확인 버튼이 handleCheckMail 호출
         />
@@ -203,4 +213,3 @@ const JoinForm = () => {
 };
 
 export default JoinForm;
-
