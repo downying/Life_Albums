@@ -19,51 +19,46 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JwtRequestFilter extends OncePerRequestFilter {
-   
+
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public JwtRequestFilter( AuthenticationManager authenticationManager,  JwtTokenProvider jwtTokenProvider ) {
+    public JwtRequestFilter(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
     }
-   
-        
+
+    // 특정 경로에 대해 필터를 적용하지 않도록 설정
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.equals("/users/join") || path.equals("/users/login");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-                
+
         // HTTP 헤더에서 토큰을 가져옴
         String header = request.getHeader(SecurityConstants.TOKEN_HEADER);
         log.info("authorization : " + header);
 
-        
-        //✅ Bearer + {jwt} 체크
-        // 헤더가 없거나 형식이 올바르지 않으면 다음 필터로 진행
-        if (header == null || header.length() == 0 || !header.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+        // Bearer + {jwt} 체크
+        if (header == null || !header.startsWith(SecurityConstants.TOKEN_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 🔐 JWT
-        // Bearer + ${jwt} ➡ "Bearer " 제거
+        // Bearer 제거 후 JWT 추출
         String jwt = header.replace(SecurityConstants.TOKEN_PREFIX, "");
-        
-        
-        // 토큰을 사용하여 Authentication 객체 생성
-        Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
 
-        // 토큰 유효 검사 (토큰이 만료되지 않았으면)
-        if( jwtTokenProvider.validateToken(jwt) ) {
-            log.info("유효한 JWT 토큰입니다.");
-            // 👩‍💼 [로그인]
-            // SecurityContextHolder(사용자 보안정보를 담는 객체)에
-            // Authentication(사용자 인증 정보) 객체를 설정
+        // JWT 유효성 검사
+        if (jwtTokenProvider.validateToken(jwt)) {
+            Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
+            log.info("유효한 JWT 토큰입니다.");
         }
-        
-        // 다음 필터로 진행
+
         filterChain.doFilter(request, response);
     }
 }

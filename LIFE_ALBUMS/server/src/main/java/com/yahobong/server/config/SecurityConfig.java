@@ -63,7 +63,7 @@ public class SecurityConfig {
 
         // 권한 및 인가 설정
         http.authorizeRequests()
-            .antMatchers("/", "/login","/users/login").permitAll()  // 이 경로는 모두 허용
+            .antMatchers("/", "/login", "/users/login", "/users/join").permitAll()  // 회원가입 및 로그인 경로 허용
             .anyRequest().authenticated();  // 그 외의 모든 요청은 인증 필요
 
         // 사용자 정보를 불러오는 서비스 설정

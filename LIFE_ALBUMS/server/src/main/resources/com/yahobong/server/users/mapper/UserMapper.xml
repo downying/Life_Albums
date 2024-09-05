@@ -24,11 +24,18 @@
         WHERE id = #{id} 
     </select>
 
-    <!-- 회원 조회 -->
-    <select id="select" resultMap="userMap">
+    <!-- 아이디로 회원 조회 -->
+    <select id="selectById" resultMap="userMap">
         SELECT userNo, id, pw, name, mail, phone   
         FROM users
         WHERE id = #{id} 
+    </select>
+
+    <!-- 이메일로 회원 조회 -->
+    <select id="selectByEmail" resultMap="userMap">
+        SELECT userNo, id, pw, name, mail, phone   
+        FROM users
+        WHERE mail = #{mail} 
     </select>
 
     <!-- 회원가입 -->
