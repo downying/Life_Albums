@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import DayCell from '../../components/calender/DayCell';
+import DayCell from '../../components/calendar/DayCell';
 import Sidebar from '../../components/albums/Sidebar';
 
-const CalenderPage = () => {
+const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const monthNames = [
     "1월", "2월", "3월", "4월", "5월", "6월",
@@ -89,4 +89,4 @@ const CalenderPage = () => {
   );
 };
 
-export default CalenderPage;
+export default CalendarPage;
