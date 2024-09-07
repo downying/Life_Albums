@@ -51,7 +51,7 @@ const LoginForm = () => {
         </div>
       </form>
       <div className="text-center text-[0.8125rem] text-gray-600"> 
-        <Link to="/" className="mr-1">아이디 찾기</Link> | 
+        <Link to="/findId" className="mr-1">아이디 찾기</Link> | 
         <Link to="/" className="ml-1 mr-1">비밀번호 찾기</Link> | 
         <Link to="/join" className="ml-1">회원가입</Link>
       </div>

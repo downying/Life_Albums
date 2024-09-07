@@ -173,5 +173,19 @@ public class UserController {
         response.put("message", "회원가입이 완료되었습니다.");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    // ID 찾기
+    @GetMapping("/findId")
+    public ResponseEntity<?> findId(@RequestParam String name, @RequestParam String mail, @RequestParam String phone) {
+        try {
+            String id = userService.findId(name, mail, phone);
+            Map<String, String> response = new HashMap<>();
+            response.put("id", id);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+    
     
 }

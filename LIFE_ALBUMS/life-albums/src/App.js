@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { BrowserRouter, Route, Routes, useNavigate, useLocation } from 'react-router-dom'; 
 import './App.css';
 import LoginPage from './pages/user/LoginPage';
+import FindIdPage from './pages/user/FindIdPage';
 import JoinPage from './pages/user/JoinPage';
 import AlbumsPage from './pages/albums/AlbumsPage';
 import CalenderPage from './pages/calender/CalenderPage';
@@ -27,8 +28,11 @@ const AppRoutes = () => {
   const currentLocation = useLocation(); // location을 다른 변수 이름으로 변경
 
   useEffect(() => {
-    // 회원가입 페이지는 예외로 처리
-    if (currentLocation.pathname !== '/join') {
+    // 회원가입, 로그인, 아이디 찾기 페이지는 예외로 처리
+    const publicRoutes = ['/join', '/login', '/findId'];
+  
+    // 현재 경로가 publicRoutes에 포함되지 않은 경우에만 리디렉션 수행
+    if (!publicRoutes.includes(currentLocation.pathname)) {
       if (isLoggedIn) {
         navigate('/album');
       } else {
@@ -42,6 +46,9 @@ const AppRoutes = () => {
     <Routes>
       {/* 로그인 페이지 */}
       <Route path="/login" element={<LoginPage />} />
+
+      {/* 아이디찾기 페이지 */}
+      <Route path="/findId" element={<FindIdPage />} />
       
       {/* 회원가입 */}
       <Route path="/join" element={<JoinPage />} />
