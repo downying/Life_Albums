@@ -26,7 +26,7 @@ CREATE TABLE `files` (
     `year`      INT            NULL,
     `month`     INT            NULL,
     `day`       INT            NULL,
-    `star`      ENUM('0', '1') NULL,
+    `star`      INT            NULL,
     `regDate`   TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`fileNo`),
     FOREIGN KEY (`albumsNo`) REFERENCES `albums`(`albumsNo`) ON UPDATE CASCADE ON DELETE CASCADE

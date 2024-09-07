@@ -5,7 +5,7 @@ import LoginPage from './pages/user/LoginPage';
 import FindIdPage from './pages/user/FindIdPage';
 import JoinPage from './pages/user/JoinPage';
 import AlbumsPage from './pages/albums/AlbumsPage';
-import CalenderPage from './pages/calender/CalenderPage';
+import CalendarPage from './pages/calendar/CalendarPage';
 import LoginProvider, { LoginContext } from './components/LoginProvider';
 import Header from './components/static/Header';
 import Footer from './components/static/Footer';
@@ -29,7 +29,7 @@ const AppRoutes = () => {
 
   useEffect(() => {
     // 회원가입, 로그인, 아이디 찾기 페이지는 예외로 처리
-    const publicRoutes = ['/join', '/login', '/findId'];
+    const publicRoutes = ['/join', '/login', '/findId', '/calendar'];
   
     // 현재 경로가 publicRoutes에 포함되지 않은 경우에만 리디렉션 수행
     if (!publicRoutes.includes(currentLocation.pathname)) {
@@ -57,7 +57,7 @@ const AppRoutes = () => {
       <Route path="/album" element={<AlbumsPage />} />
 
       {/* 캘린더 */}
-      <Route path="/calendar" element={<CalenderPage />} />
+      <Route path="/calendar" element={<CalendarPage />} />
 
       {/* 기본 경로 처리 */}
       <Route path="/" element={<LoginPage />} />
