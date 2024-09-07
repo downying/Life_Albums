@@ -108,8 +108,11 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public String findId(String name, String mail, String phone) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findId'");
+        String id = userMapper.findId(name, mail, phone);
+        if (id == null) {
+            throw new Exception("해당 정보로 등록된 사용자를 찾을 수 없습니다.");
+        }
+        return id;
     }
 
     @Override
