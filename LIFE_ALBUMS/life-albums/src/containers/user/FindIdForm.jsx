@@ -27,9 +27,9 @@ const FindIdForm = () => {
       // 서버로부터 응답이 성공적으로 돌아온 경우
       if (response.status === 200) {
         const { id } = response.data;
+        console.log('찾은 아이디:', id); // ID 확인용 콘솔 출력
         // ID 확인 페이지로 이동하며 찾은 아이디를 전달
-        navigate('/findIdResult', {state: {id}});
-        
+        navigate('/findIdResult', { state: { id } });
       } else {
         // 서버가 200이 아닌 상태로 응답한 경우
         alert('입력하신 정보로 아이디를 찾을 수 없습니다.');
