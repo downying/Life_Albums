@@ -27,10 +27,9 @@ const FindIdForm = () => {
       // 서버로부터 응답이 성공적으로 돌아온 경우
       if (response.status === 200) {
         const { id } = response.data;
-        // ID 찾기 성공 시 사용자에게 아이디를 보여주거나 알림
-        alert(`아이디는 ${id}입니다.`);
-        // 아이디를 찾으면 로그인 페이지로 리다이렉트
-        navigate('/login'); // 로그인 페이지로 이동
+        // ID 확인 페이지로 이동하며 찾은 아이디를 전달
+        navigate('/findIdResult', {state: {id}});
+        
       } else {
         // 서버가 200이 아닌 상태로 응답한 경우
         alert('입력하신 정보로 아이디를 찾을 수 없습니다.');
@@ -51,7 +50,7 @@ const FindIdForm = () => {
           <Input
             type="text"
             label="NAME"
-            placeholder="Enter your name"
+            placeholder="NAME"
             value={name}
             onChange={(e) => setName(e.target.value)} // 입력값 변경 시 상태 업데이트
           />
@@ -62,7 +61,7 @@ const FindIdForm = () => {
           <Input
             type="email"
             label="EMAIL"
-            placeholder="Enter your email"
+            placeholder="EMAIL"
             value={mail}
             onChange={(e) => setMail(e.target.value)} // 입력값 변경 시 상태 업데이트
           />
@@ -73,7 +72,7 @@ const FindIdForm = () => {
           <Input
             type="text"
             label="PHONE NUMBER"
-            placeholder="Enter your phone number"
+            placeholder="PHONE NUMBER"
             value={phone}
             onChange={(e) => setPhone(e.target.value)} // 입력값 변경 시 상태 업데이트
           />

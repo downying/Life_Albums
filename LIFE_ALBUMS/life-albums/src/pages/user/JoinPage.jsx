@@ -3,7 +3,7 @@ import JoinForm from '../../containers/user/JoinForm';
 
 const JoinPage = () => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-[88vh]">
       <div className="flex-grow bg-gray-100 flex flex-col justify-center p-4">
         {/* "JOIN" 텍스트의 위치와 크기를 조정 */}
         <h1 className="text-center text-4xl font-bold text-black-900 mb-2 mt-8">JOIN</h1> {/* mb-2로 수정 */}
