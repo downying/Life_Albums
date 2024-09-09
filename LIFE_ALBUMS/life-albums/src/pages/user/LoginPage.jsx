@@ -3,7 +3,7 @@ import LoginForm from '../../containers/user/LoginForm';
 
 const LoginPage = () => {
     return (
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-[88vh]">
         <div className="flex-grow flex items-center justify-center bg-gray-100">
           <div className="relative w-[600px] h-[500px]"> {/* 세로 길이를 500px로 늘림 */}
             {/* 앨범 모양 */}
