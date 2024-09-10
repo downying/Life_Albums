@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // useNavigate 추가
-import Title from '../../components/user/Title';
 import Input from '../../components/user/Input';
 import Button from '../../components/user/Button';
 
@@ -53,7 +52,7 @@ const FindPasswordForm = () => {
 
   return (
     <div className="w-full max-w-xs mx-auto">
-      <Title text="FIND PASSWORD" />
+      <h1 className="text-center text-4xl font-bold text-black-900 mb-8 mt-8">FIND PASSWORD</h1>
       <form onSubmit={handleSubmit}>
         {/* 이름 입력 필드 */}
         <div className="mb-4">

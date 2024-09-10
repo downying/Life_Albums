@@ -21,7 +21,7 @@ const ResetPasswordForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-xs mx-auto">
-      <Title text="RESET PASSWORD" />
+      <h1 className="text-center text-4xl font-bold text-black-900 mb-8 mt-8">RESET PASSWORD</h1>
       <Input 
         // label="PASSWORD" 
         placeholder="PASSWORD"
