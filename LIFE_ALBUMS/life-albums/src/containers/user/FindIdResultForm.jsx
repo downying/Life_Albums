@@ -24,8 +24,8 @@ const FindIdResultForm = () => {
   const { id } = location.state; // 전달받은 ID
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-xs mx-auto text-center mt-20">
+    <div className="flex flex-col justify-center items-center min-h-[88vh] bg-gray-100">
+      <div className="w-full max-w-xl mx-auto text-center mt-20">
         {/* TextDisplay로 ID 출력 */}
         <TextDisplay id={id} />
         {/* 확인 버튼 */}
