@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService{
 
         // 인증 성공
         log.info("인증 성공 - ID: " + id);
-        return true;
+        return true; // 로그인 성공 후 사용자 정보를 반환할 필요가 있음
     }
 
     /**

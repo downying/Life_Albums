@@ -1,6 +1,6 @@
 package com.yahobong.server.users.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,17 +17,27 @@ import java.nio.file.StandardCopyOption;
 @Service
 public class FileService {
 
-    // 각자 Path 적어야됨 맥이라 일케함
-    private final Path root = Paths.get("/Users/apnalchangchanghongjunbeom/upload");
+    // 경로를 properties에서 가져옴
+    @Value("${upload.path}")
+    private String uploadPath;
 
-    @Autowired
-    private FileMapper fileMapper;
+    private final FileMapper fileMapper;
+
+    public FileService(FileMapper fileMapper) {
+        this.fileMapper = fileMapper;
+    }
 
     @Transactional
     public FileDTO saveFile(MultipartFile file, FileDTO fileDto) throws IOException {
-        // 파일 저장
+        // 파일 저장 경로 설정 (필요시 다중 경로 처리 가능)
+        String[] paths = uploadPath.split(",");
+        Path root = Paths.get(paths[0]); // 첫 번째 경로 사용
+
+        // 파일 이름 생성
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        Files.copy(file.getInputStream(), this.root.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+        
+        // 파일 저장
+        Files.copy(file.getInputStream(), root.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
 
         // 파일 정보를 데이터베이스에 저장
         fileMapper.insertFile(fileDto);
