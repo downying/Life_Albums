@@ -23,24 +23,23 @@ import com.yahobong.server.users.dto.CustomUser;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
     // 생성자
-    public JwtAuthenticationFilter( AuthenticationManager authenticationManager,  JwtTokenProvider jwtTokenProvider ) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
-        // 🔗 필터 URL 경로 설정 : /login
+        // 로그인 경로 설정: /login
         setFilterProcessesUrl(SecurityConstants.AUTH_LOGIN_URL);
-
-        log.info(" JwtAuthenticationFilter 생성자 작동 ");
     }
-    
+
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-    throws AuthenticationException {
-        
+            throws AuthenticationException {
+
         log.info("로그인 인증 시도 메소드 작동 : attemptAuthentication()");
         String id = request.getParameter("id");
         String pw = request.getParameter("pw");
@@ -57,40 +56,40 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         log.info("authenticationManager : " + authenticationManager);
         log.info("authentication : " + authentication);
         log.info("인증 여부(isAuthenticated) : " + authentication.isAuthenticated());
-        
+
         // 인증 실패 (username, password 불일치)
-        if( !authentication.isAuthenticated() ) {
+        if (!authentication.isAuthenticated()) {
             log.info("인증 실패 : 아이디와 비밀번호가 일치하지 않습니다.");
-            response.setStatus(401);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
 
         return authentication;
     }
 
-
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authentication) throws IOException, ServletException {
-        log.info("인증 성공 (auth SUCCESS) : ");
+        log.info("인증 성공 (auth SUCCESS)");
 
+        // 사용자 정보 가져오기
         CustomUser user = ((CustomUser) authentication.getPrincipal());
         int userNo = user.getUser().getUserNo();
         String userId = user.getUser().getId();
 
-        // 권한 관련 코드 주석 처리
-        /*
-        List<String> roles = user.getAuthorities()
-                                .stream()
-                                .map(GrantedAuthority::getAuthority)
-                                .collect(Collectors.toList());
-        */
-
-        // 🔐 JWT
         log.info("userNo: {}, userId: {}", userNo, userId);
-        String token = jwtTokenProvider.createToken(userNo, userId); // createToken 메서드에서 roles를 제외한 형태로 사용
 
-        // 💍 { Authorization : Bearer + {jwt} } 
+        // JWT 생성
+        String token = jwtTokenProvider.createToken(userNo, userId);
+
+        // 토큰 생성 실패 확인
+        if (token == null || token.isEmpty()) {
+            log.error("JWT 토큰 생성에 실패했습니다.");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        // Authorization: Bearer {jwt} 헤더 추가
         response.addHeader(SecurityConstants.TOKEN_HEADER, SecurityConstants.TOKEN_PREFIX + token);
-        response.setStatus(200);
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }
