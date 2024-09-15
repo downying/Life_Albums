@@ -27,6 +27,7 @@ import org.springframework.ui.Model;
 
 import com.yahobong.server.users.service.UserService;
 import com.yahobong.server.users.dto.Users;
+import com.yahobong.server.security.jwt.provider.JwtTokenProvider;
 import com.yahobong.server.users.dto.CustomUser;
 
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,9 @@ public class UserController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+     @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/login")
     public String login(
@@ -77,13 +81,17 @@ public class UserController {
             boolean loginSuccess = userService.login(loginRequest);
 
             if (loginSuccess) {
-                Users loggedInUser = userService.selectById(loginRequest.getId()); // 로그인한 사용자 정보 조회
+                Users loggedInUser = userService.selectById(loginRequest.getId());
 
-                // 로그인 성공 시 userNo와 기타 사용자 정보를 반환
+                // JWT 토큰 생성
+                String accessToken = jwtTokenProvider.createToken(loggedInUser.getUserNo(), loggedInUser.getId());
+
+                // 로그인 성공 시 사용자 정보와 accessToken 반환
                 Map<String, Object> responseBody = new HashMap<>();
                 responseBody.put("userNo", loggedInUser.getUserNo());
                 responseBody.put("username", loggedInUser.getId());
                 responseBody.put("message", "Login successful");
+                responseBody.put("accessToken", accessToken);  // JWT 토큰 추가
 
                 return ResponseEntity.ok().body(responseBody);
             } else {
@@ -94,6 +102,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.");
         }
     }
+
 
 
     /**

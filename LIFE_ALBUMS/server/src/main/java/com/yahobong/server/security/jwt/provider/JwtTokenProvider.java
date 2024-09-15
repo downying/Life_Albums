@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.yahobong.server.prop.JwtProps;
-import com.yahobong.server.security.jwt.constants.SecurityConstants;
 import com.yahobong.server.users.dto.CustomUser;
 import com.yahobong.server.users.dto.Users;
 import com.yahobong.server.users.mapper.UserMapper;
@@ -24,6 +23,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -40,27 +41,18 @@ public class JwtTokenProvider {
      * 👩‍💼➡🔐 토큰 생성 (기존 메소드)
      */
     public String createToken(int userNo, String id) {
-        log.info("토큰생성!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         byte[] signingKey = getSigningKey();
-
+    
         // JWT 토큰 생성
-        String jwt = Jwts.builder()
-            // .signWith(Keys.hmacShaKeyFor(signingKey), io.jsonwebtoken.SignatureAlgorithm.HS512)
-            // .setHeaderParam("typ", SecurityConstants.TOKEN_TYPE)
-            // .setExpiration(new Date(System.currentTimeMillis() + 864000000))  // 토큰 만료 시간 설정 (10일)
-                .signWith(Keys.hmacShaKeyFor(signingKey), Jwts.SIG.HS512)      // 서명에 사용할 키와 알고리즘 설정
-                .header()                                                      // update (version : after 1.0)
-                    .add("typ", SecurityConstants.TOKEN_TYPE)              // 헤더 설정
-                .and()
-                .expiration(new Date(System.currentTimeMillis() + 864000000))  // 토큰 만료 시간 설정 (10일)
-                .claim("uno", "" + userNo)  // 클레임 설정: 사용자 번호
-                .claim("uid", id)  // 클레임 설정: 사용자 아이디
-                .compact();      
-
-        log.info("jwt : " + jwt);
-
-        return jwt;
+        return Jwts.builder()
+            .setSubject(id)  // 사용자 ID를 주제로 설정
+            .claim("uno", userNo)  // 사용자 번호 클레임 추가
+            .claim("uid", id)  // 사용자 ID 클레임 추가
+            .setExpiration(new Date(System.currentTimeMillis() + 864000000))  // 만료 시간 설정 (10일)
+            .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS512)  // 서명 설정
+            .compact();
     }
+    
     
     /**
      * 🔐➡👩‍💼 토큰 해석

@@ -24,23 +24,23 @@ function App() {
 }
 
 const AppRoutes = () => {
-  const { isLoggedIn } = useContext(LoginContext);
+  const { isLoggedIn, userInfo } = useContext(LoginContext);
   const navigate = useNavigate();
   const currentLocation = useLocation(); // location을 다른 변수 이름으로 변경
 
   useEffect(() => {
-    // 회원가입, 로그인, 아이디 찾기 페이지는 예외로 처리
     const publicRoutes = ['/join', '/login', '/findId', '/calendar', '/findIdResult'];
   
-    // 현재 경로가 publicRoutes에 포함되지 않은 경우에만 리디렉션 수행
     if (!publicRoutes.includes(currentLocation.pathname)) {
-      if (isLoggedIn) {
-        navigate('/albums/users/:userNo');
+      if (isLoggedIn && userInfo) {
+        // 로그인한 사용자의 userNo를 경로에 포함하여 이동
+        navigate(`/albums/users/${userInfo.userNo}`);
       } else {
         navigate('/login');
       }
     }
-  }, [isLoggedIn, navigate, currentLocation.pathname]);
+  }, [isLoggedIn, navigate, currentLocation.pathname, userInfo]);
+  
 
 
   return (
