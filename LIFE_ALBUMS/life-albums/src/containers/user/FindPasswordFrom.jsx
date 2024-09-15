@@ -103,7 +103,7 @@ const FindPasswordForm = () => {
         )}
 
         {/* 제출 버튼 */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center mt-8">
           <Button text="비밀번호 찾기" />
         </div>
       </form>

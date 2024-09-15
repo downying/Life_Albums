@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Title from '../../components/user/Title';
 import Input from '../../components/user/Input';
 import Button from '../../components/user/Button';
 
@@ -22,6 +21,7 @@ const ResetPasswordForm = () => {
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-xs mx-auto">
       <h1 className="text-center text-4xl font-bold text-black-900 mb-8 mt-8">RESET PASSWORD</h1>
+      <p className="text-center text-lg text-black-900 mb-8 mt-8">비밀번호를 재설정 해주세요</p>
       <Input 
         // label="PASSWORD" 
         placeholder="PASSWORD"
@@ -36,7 +36,10 @@ const ResetPasswordForm = () => {
         value={passwordCheck} 
         onChange={(e) => setPasswordCheck(e.target.value)} 
       />
-      <Button text="확인" />
+      <div className='mt-8'>
+        <Button text="확인" />
+      </div>
+      
     </form>
   );
 };
