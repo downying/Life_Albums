@@ -61,7 +61,7 @@ const AlbumsPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-[88vh] relative"> {/* 페이지 높이를 90vh로 설정 */}
+    <div className="flex flex-col min-h-[calc(100vh-116px)] relative"> {/* 페이지 높이를 100vh-116px로 설정 */}
       <div className="flex flex-grow">
         <Sidebar /> {/* 사이드바 추가 */}
         
@@ -131,7 +131,7 @@ const AlbumsPage = () => {
             </div>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-2">
             <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={onPageChange} />
           </div>
         </div>
