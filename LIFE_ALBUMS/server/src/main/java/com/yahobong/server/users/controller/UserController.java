@@ -77,7 +77,15 @@ public class UserController {
             boolean loginSuccess = userService.login(loginRequest);
 
             if (loginSuccess) {
-                return ResponseEntity.ok().body("Login successful");
+                Users loggedInUser = userService.selectById(loginRequest.getId()); // 로그인한 사용자 정보 조회
+
+                // 로그인 성공 시 userNo와 기타 사용자 정보를 반환
+                Map<String, Object> responseBody = new HashMap<>();
+                responseBody.put("userNo", loggedInUser.getUserNo());
+                responseBody.put("username", loggedInUser.getId());
+                responseBody.put("message", "Login successful");
+
+                return ResponseEntity.ok().body(responseBody);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.");
             }
@@ -86,6 +94,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.");
         }
     }
+
 
     /**
      * 사용자 정보 조회

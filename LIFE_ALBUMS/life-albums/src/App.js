@@ -37,7 +37,7 @@ const AppRoutes = () => {
     // 현재 경로가 publicRoutes에 포함되지 않은 경우에만 리디렉션 수행
     if (!publicRoutes.includes(currentLocation.pathname)) {
       if (isLoggedIn) {
-        navigate('/album');
+        navigate('/albums/users/:userNo');
       } else {
         navigate('/login');
       }
@@ -66,7 +66,7 @@ const AppRoutes = () => {
       <Route path="/join" element={<JoinPage />} />
       
       {/* 앨범 */}
-      <Route path="/album" element={<AlbumsPage />} />
+      <Route path="/albums/users/:userNo" element={<AlbumsPage />} />
 
       {/* 캘린더 */}
       <Route path="/calendar" element={<CalendarPage />} />
