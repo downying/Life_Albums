@@ -51,7 +51,8 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="w-full max-w-xs mx-auto">
+    <div>
+      <div className="w-full max-w-xs mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-center">LOGIN</h2>
       <form onSubmit={handleLogin}>
         <div className="mb-4">
@@ -85,10 +86,13 @@ const LoginForm = () => {
       </form>
       <div className="text-center text-[0.8125rem] text-gray-600"> 
         <Link to="/findId" className="mr-1">아이디 찾기</Link> | 
-        <Link to="/" className="ml-1 mr-1">비밀번호 찾기</Link> | 
+        <Link to="/findPassword" className="ml-1 mr-1">비밀번호 찾기</Link> | 
         <Link to="/join" className="ml-1">회원가입</Link>
       </div>
     </div>
+
+    </div>
+    
   );
 };
 

@@ -61,7 +61,7 @@ const AlbumsPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-[90vh] relative"> {/* 페이지 높이를 90vh로 설정 */}
+    <div className="flex flex-col h-[88vh] relative"> {/* 페이지 높이를 90vh로 설정 */}
       <div className="flex flex-grow">
         <Sidebar /> {/* 사이드바 추가 */}
         

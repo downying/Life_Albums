@@ -43,13 +43,13 @@ const FindIdForm = () => {
 
   return (
     <div className="w-full max-w-xs mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-center">FIND ID</h2>
+      <h1 className="text-center text-4xl font-bold text-black-900 mb-8 mt-8">FIND ID</h1>
       <form onSubmit={handleSubmit}>
         {/* 이름 입력 필드 */}
         <div className="mb-4">
           <Input
             type="text"
-            label="NAME"
+            // label="NAME"
             placeholder="NAME"
             value={name}
             onChange={(e) => setName(e.target.value)} // 입력값 변경 시 상태 업데이트
@@ -60,7 +60,7 @@ const FindIdForm = () => {
         <div className="mb-4">
           <Input
             type="email"
-            label="EMAIL"
+            // label="EMAIL"
             placeholder="EMAIL"
             value={mail}
             onChange={(e) => setMail(e.target.value)} // 입력값 변경 시 상태 업데이트
@@ -71,7 +71,7 @@ const FindIdForm = () => {
         <div className="mb-6">
           <Input
             type="text"
-            label="PHONE NUMBER"
+            // label="PHONE NUMBER"
             placeholder="PHONE NUMBER"
             value={phone}
             onChange={(e) => setPhone(e.target.value)} // 입력값 변경 시 상태 업데이트
