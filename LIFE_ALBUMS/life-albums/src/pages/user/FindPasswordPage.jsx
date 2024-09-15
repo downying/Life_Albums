@@ -10,7 +10,7 @@ const FindPasswordPage = () => {
   return (
     <div>
       {/* Password 찾기 폼 컴포넌트 */}
-      <main className="flex flex-col items-center justify-center min-h-[88vh] bg-gray-100">
+      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-116px)] bg-gray-100">
         <FindPasswordForm /> {/* FindPasswordForm 컴포넌트 호출 */}
 
 

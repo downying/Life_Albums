@@ -52,7 +52,7 @@ const LoginForm = () => {
 
   return (
     <div>
-      <div className="w-full max-w-xs mx-auto">
+      <div className="w-full max-w-xs mx-auto sm:max-w-sm md:max-w-md lg:max-w-lg">
       <h2 className="text-2xl font-bold mb-6 text-center">LOGIN</h2>
       <form onSubmit={handleLogin}>
         <div className="mb-4">
@@ -81,7 +81,7 @@ const LoginForm = () => {
         </div>
         {error && <div className="text-red-500 text-sm mb-4 text-center">{error}</div>}
         <div className="mb-4">
-          <Button text="로그인" />
+          <Button text="로그인" className="w-full"/>
         </div>
       </form>
       <div className="text-center text-[0.8125rem] text-gray-600"> 
