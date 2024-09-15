@@ -4,6 +4,8 @@ import './App.css';
 import LoginPage from './pages/user/LoginPage';
 import FindIdPage from './pages/user/FindIdPage';
 import FindIdResultPage from './pages/user/FindIdResultPage';
+import FindPasswordPage from './pages/user/FindPasswordPage';
+import ResetPasswordPage from './pages/user/ResetPasswordPage';
 import JoinPage from './pages/user/JoinPage';
 import AlbumsPage from './pages/albums/AlbumsPage';
 import CalendarPage from './pages/calendar/CalendarPage';
@@ -29,7 +31,9 @@ const AppRoutes = () => {
   const currentLocation = useLocation(); // location을 다른 변수 이름으로 변경
 
   useEffect(() => {
-    const publicRoutes = ['/join', '/login', '/findId', '/calendar', '/findIdResult'];
+    // 회원가입, 로그인, 아이디 찾기 페이지는 예외로 처리
+    const publicRoutes = ['/join', '/login', '/findId', '/calendar', '/findIdResult', '/findPassword', '/resetPassword'];
+
   
     if (!publicRoutes.includes(currentLocation.pathname)) {
       if (isLoggedIn && userInfo) {
@@ -53,6 +57,12 @@ const AppRoutes = () => {
 
       {/* 아이디찾기 완료 페이지*/}
       <Route path="/findIdResult" element={<FindIdResultPage />} />
+
+      {/* 비밀번호 찾기 페이지 */}
+      <Route path="/findPassword" element={<FindPasswordPage />} />
+
+      {/* 비밀번호 재설정 페이지 */}
+      <Route path="/resetPassword" element={<ResetPasswordPage />} />
       
       {/* 회원가입 */}
       <Route path="/join" element={<JoinPage />} />

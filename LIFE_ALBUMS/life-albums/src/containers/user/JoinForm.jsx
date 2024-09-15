@@ -4,6 +4,7 @@ import Button from '../../components/user/Button';
 import { useNavigate } from 'react-router-dom';
 import { checkId, checkMail, join } from '../../apis/user/auth';
 import { LoginContext } from '../../components/LoginProvider';
+import Checkbox from '../../components/user/Checkbox';
 
 const JoinForm = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ const JoinForm = () => {
   const [idExists, setIdExists] = useState(null);
   const [mailExists, setMailExists] = useState(null);
   const [formError, setFormError] = useState('');
-
+  
   // ID 중복 확인
   const handleCheckId = async () => {
     if (!id) {
@@ -116,7 +117,6 @@ const JoinForm = () => {
       {/* ID 입력 필드와 중복 확인 버튼 */}
       <div className="mb-2">
         <Input
-          label="ID"
           type="text"
           placeholder="ID"
           value={id}
@@ -125,14 +125,13 @@ const JoinForm = () => {
             setIdExists(null); // ID가 변경되면 중복 확인 초기화
           }}
           checkLabel="중복 확인"
-          onCheck={handleCheckId} // 중복 확인 버튼이 handleCheckId 호출
+          onCheckClick={handleCheckId} // onCheckClick로 연결 변경
         />
       </div>
 
       {/* 비밀번호 입력 필드 */}
       <div className="mb-2">
         <Input
-          label="PASSWORD"
           type="password"
           placeholder="PASSWORD"
           value={pw}
@@ -143,7 +142,6 @@ const JoinForm = () => {
       {/* 비밀번호 확인 입력 필드 */}
       <div className="mb-2">
         <Input
-          label="PASSWORD CHECK"
           type="password"
           placeholder="PASSWORD CHECK"
           value={pwCheck}
@@ -154,7 +152,6 @@ const JoinForm = () => {
       {/* 이름 입력 필드 */}
       <div className="mb-2">
         <Input
-          label="NAME"
           type="text"
           placeholder="NAME"
           value={name}
@@ -165,7 +162,6 @@ const JoinForm = () => {
       {/* 이메일 입력 필드와 중복 확인 버튼 */}
       <div className="mb-2">
         <Input
-          label="EMAIL"
           type="email"
           placeholder="E-MAIL"
           value={mail}
@@ -174,14 +170,13 @@ const JoinForm = () => {
             setMailExists(null); // 이메일이 변경되면 중복 확인 초기화
           }}
           checkLabel="중복 확인"
-          onCheck={handleCheckMail} // 중복 확인 버튼이 handleCheckMail 호출
+          onCheckClick={handleCheckMail} // onCheckClick로 연결 변경
         />
       </div>
 
       {/* 전화번호 입력 필드 */}
       <div className="mb-2">
         <Input
-          label="PHONE NUMBER"
           type="text"
           placeholder="PHONE NUMBER"
           value={phone}
@@ -190,15 +185,13 @@ const JoinForm = () => {
       </div>
 
       {/* ID 기억 여부 체크박스 */}
-      <div className="mb-2">
-        <label>
-          <input
-            type="checkbox"
-            checked={rememberId}
-            onChange={(e) => setRememberId(e.target.checked)}
-          />
-          아이디 기억하기
-        </label>
+      <div className="mb-4 flex justify-center items-center"> 
+        <Checkbox 
+          label="아이디 저장" 
+          className="text-sm" 
+          checked={rememberId}  // 체크박스 상태 전달
+          onChange={(e) => setRememberId(e.target.checked)}  // 체크박스 상태 변경 처리
+        /> 
       </div>
 
       {/* 회원가입 버튼 */}

@@ -24,13 +24,17 @@ const FindIdResultForm = () => {
   const { id } = location.state; // 전달받은 ID
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex flex-col justify-center items-center min-h-[calc(100vh-116px)] bg-gray-100">
       {/* 메인 콘텐츠를 중앙보다 조금 더 위로 올립니다 */}
-      <div className="w-full max-w-xs mx-auto text-center mt-20">
+      <div className="w-full max-w-lg mx-auto text-center">
         {/* ID 출력: TextDisplay 컴포넌트로 출력 */}
         <TextDisplay id={id} />
-        {/* 확인 버튼 */}
-        <Button text="확인" onClick={() => navigate('/')} />
+        <div className="w-full max-w-xs mx-auto text-center">
+          {/* 확인 버튼 */}
+          <Button text="확인" onClick={() => navigate('/')} />
+        </div>
+        
+        
       </div>
     </div>
   );
