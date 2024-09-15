@@ -45,6 +45,28 @@ public class AlbumController {
         }
     }
 
+    // 앨범 제목 업데이트
+    @PutMapping("/update/{albumsNo}")
+    public ResponseEntity<AlbumDTO> updateAlbumTitle(@PathVariable("albumsNo") int albumsNo, @RequestBody AlbumDTO albumDto) {
+        try {
+            AlbumDTO updatedAlbum = albumService.updateAlbumTitle(albumsNo, albumDto);
+            return ResponseEntity.ok(updatedAlbum);
+        } catch (Exception e) {
+            log.error("앨범 제목 업데이트 중 오류 발생: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // 앨범 삭제
+    @DeleteMapping("/delete/{albumsNo}")
+    public ResponseEntity<Void> deleteAlbum(@PathVariable("albumsNo") int albumsNo) {
+        try {
+            albumService.deleteAlbum(albumsNo);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
     
 }

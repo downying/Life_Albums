@@ -12,13 +12,17 @@ const LoginProvider = ({ children }) => {
     const [savedUsername, setSavedUsername] = useState(Cookies.get('rememberedId') || ''); // 쿠키에서 저장된 아이디 불러오기
 
     const loginCheck = useCallback(async () => {
+        console.log("로그인 상태 확인 시작");
         const accessToken = Cookies.get("accessToken");
         if (!accessToken) {
-            logoutSetting();
+            console.log("액세스 토큰 없음, 로그아웃 처리");
+            logoutSetting(); // 로그아웃 처리
             return;
         }
     
         api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+        console.log("액세스 토큰 존재, 사용자 정보 요청 중...");
+
         try {
             const response = await auth.info();  // 사용자 정보 요청
             const data = response.data;
@@ -27,46 +31,52 @@ const LoginProvider = ({ children }) => {
             console.log("사용자 정보:", data);
     
             if (data === 'UNAUTHORIZED' || response.status === 401) {
-                logoutSetting();
+                 console.log("인증 실패, 로그아웃 처리");
+                logoutSetting(); // 로그아웃 처리
                 return;
             }
+            console.log("인증 성공, 사용자 데이터:", data);
             loginSetting(data);
         } catch (error) {
-            logoutSetting();
+            console.error("사용자 정보 요청 중 에러:", error);
+            logoutSetting(); // 에러 발생 시 로그아웃 처리
         }
     }, []);
     
 
     const login = async (id, pw, rememberId, navigate) => {
-        try {
-            const response = await api.post('/users/login', { id, pw });
-            const data = response.data;
+      try {
+        console.log("로그인 요청 전");
+        const response = await api.post('/users/login', { id, pw });
+        console.log("로그인 응답 후", response);
+        const data = response.data;
     
-            // 응답 데이터에 userNo가 있는지 확인
-            console.log("로그인 응답 데이터:", data);
+        if (data && data.accessToken) {  // 서버 응답에서 accessToken을 확인
+          Cookies.set("accessToken", data.accessToken);  // accessToken을 쿠키에 저장
+          console.log("accessToken 쿠키에 저장됨:", Cookies.get("accessToken"));
+          
+          if (rememberId) {
+            Cookies.set("rememberedId", id, { expires: 7, path: '/' });
+            console.log("rememberedId 쿠키 저장됨:", Cookies.get("rememberedId"));
+          } else {
+            Cookies.remove("rememberedId");
+            console.log("rememberedId 쿠키 삭제됨");
+          }
     
-            if (data && data.userNo) {
-                console.log("로그인 성공:", data);
-                Cookies.set("accessToken", data.accessToken);
-    
-                if (rememberId) {
-                    Cookies.set("rememberedId", id, { expires: 7, path: '/' });
-                    setSavedUsername(id);
-                } else {
-                    Cookies.remove("rememberedId");
-                    setSavedUsername('');
-                }
-    
-                loginSetting(data);
-                navigate(`/albums/users/${data.userNo}`);
-            } else {
-                console.error("로그인 응답에 userNo가 없습니다.");
-                setError('로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.');
-            }
-        } catch (error) {
-            console.error("로그인 요청 중 오류:", error);
-            setError('서버와의 통신 중 오류가 발생했습니다.');
+          loginSetting(data);  // 로그인 상태 설정
+          alert("로그인 성공");
+          navigate(`/albums/users/${data.userNo}`);  // 앨범 페이지로 리다이렉션
+          return true;
+        } else {
+          console.error("로그인 실패: 서버 응답에 accessToken이 없습니다.");
+          setError('로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.');
+          return false;
         }
+      } catch (error) {
+        console.error("로그인 요청 중 오류:", error);
+        setError('서버와의 통신 중 오류가 발생했습니다.');
+        return false;
+      }
     };
     
     
@@ -89,6 +99,7 @@ const LoginProvider = ({ children }) => {
     };
 
     const loginSetting = (userData) => {
+        console.log("로그인 상태 설정 중");
         console.log("로그인 상태 설정 중, 받은 userData:", userData);  // 디버깅 로그 추가
         setIsLoggedIn(true);
         setUserInfo(userData);  // userInfo에 사용자 데이터 설정

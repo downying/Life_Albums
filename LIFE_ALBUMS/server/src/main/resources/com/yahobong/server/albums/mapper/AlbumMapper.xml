@@ -5,17 +5,30 @@
 
 <mapper namespace="com.yahobong.server.albums.mapper.AlbumMapper">
 
-    <!-- 앨범을 사용자별로 조회하는 SQL (필요 시 사용) -->
-    <select id="findAlbumsByUserNo">
+    <!-- 앨범을 사용자별로 조회하는 SQL -->
+    <select id="findAlbumsByUserNo" resultType="AlbumDTO">
         SELECT albumsNo, userNo, title
         FROM albums
         WHERE userNo = #{userNo}
     </select>
-    
-    <insert id="insertAlbum" useGeneratedKeys="true" keyProperty="albumNo">
-        INSERT INTO albums title
-        VALUES #{title}
+
+    <!-- 앨범 추가 -->
+    <insert id="insertAlbum" useGeneratedKeys="true" keyProperty="albumsNo">
+        INSERT INTO albums (title, userNo)
+        VALUES (#{title}, #{userNo})
     </insert>
 
-   
+    <!-- 앨범 제목 업데이트 -->
+    <update id="updateAlbumTitle">
+        UPDATE albums
+        SET title = #{title}
+        WHERE albumsNo = #{albumsNo}
+    </update>
+
+    <!-- 앨범 삭제 -->
+    <delete id="deleteAlbum">
+        DELETE FROM albums
+        WHERE albumsNo = #{albumsNo}
+    </delete>
+
 </mapper>
