@@ -13,6 +13,9 @@ import com.yahobong.server.users.service.FileService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -30,8 +33,8 @@ public class FileUploadController {
     public ResponseEntity<?> uploadFile(
             @RequestPart("file") MultipartFile file,
             @RequestPart("data") String data) {
-        
-                
+
+
         try {
             FileDTO uploadDTO = objectMapper.readValue(data, FileDTO.class);
             log.info("Received data????: " + uploadDTO);
@@ -43,4 +46,26 @@ public class FileUploadController {
             return ResponseEntity.badRequest().body("잘못된 요청: " + e.getMessage());
         }
     }
+
+    @GetMapping("/thumbnails/{albumsNo}")
+    public ResponseEntity<Map<String, Object>> getThumbnailsByAlbumNo(
+            @PathVariable int albumsNo,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "2") int size) {
+
+        List<FileDTO> thumbnails = fileService.getThumbnailsByAlbumNo(albumsNo, page, size);
+        int totalCount = fileService.getTotalThumbnailCountByAlbumNo(albumsNo);
+        // 페이지를 size로 나눔 size = 한 화면에 뜨는 앨범
+        int totalPages = (int) Math.ceil((double) totalCount / size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("thumbnails", thumbnails);
+        response.put("currentPage", page);
+        response.put("totalItems", totalCount);
+        response.put("totalPages", totalPages);
+
+        return ResponseEntity.ok(response);
+    }
+
+
 }
