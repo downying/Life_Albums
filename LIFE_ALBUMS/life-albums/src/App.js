@@ -19,31 +19,38 @@ function App() {
       <BrowserRouter>
         <Header />
         <AppRoutes />
-        <Footer /> {/* Footer 컴포넌트를 BrowserRouter 내부로 이동 */}
+        <Footer />
       </BrowserRouter>
     </LoginProvider>
   );
 }
 
 const AppRoutes = () => {
-  const { isLoggedIn, userInfo } = useContext(LoginContext);
-  const navigate = useNavigate();
-  const currentLocation = useLocation(); // location을 다른 변수 이름으로 변경
+    const { isLoggedIn, userInfo, isCheckingLogin } = useContext(LoginContext);
+    const navigate = useNavigate();
+    const currentLocation = useLocation();
 
-  useEffect(() => {
-    // 회원가입, 로그인, 아이디 찾기 페이지는 예외로 처리
-    const publicRoutes = ['/join', '/login', '/findId', '/calendar', '/findIdResult', '/findPassword', '/resetPassword'];
+    useEffect(() => {
+        // 로그인 상태를 확인 중일 때는 리다이렉트하지 않음
+        if (isCheckingLogin) {
+            return;
+        }
 
-  
-    if (!publicRoutes.includes(currentLocation.pathname)) {
-      if (isLoggedIn && userInfo) {
-        // 로그인한 사용자의 userNo를 경로에 포함하여 이동
-        navigate(`/albums/users/${userInfo.userNo}`);
-      } else {
-        navigate('/login');
-      }
-    }
-  }, [isLoggedIn, navigate, currentLocation.pathname, userInfo]);
+        // 회원가입, 로그인, 아이디 찾기 페이지는 예외로 처리
+        const publicRoutes = ['/join', '/login', '/findId', '/calendar', '/findIdResult', '/findPassword', '/resetPassword'];
+    
+        if (!publicRoutes.includes(currentLocation.pathname)) {
+            if (isLoggedIn && userInfo) {
+                // 로그인한 사용자의 userNo를 경로에 포함하여 이동
+                if (!currentLocation.pathname.includes(`/albums/users/${userInfo.userNo}`)) {
+                    navigate(`/albums/users/${userInfo.userNo}`);
+                }
+            } else {
+                navigate('/login');
+            }
+        }
+    }, [isLoggedIn, isCheckingLogin, navigate, currentLocation.pathname, userInfo]);
+
   
 
 
