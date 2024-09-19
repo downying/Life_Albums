@@ -1,14 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { deleteFile, getFile, updateFile } from '../../apis/files/files';
 
-const Modal = ({ album, isOpen, onClose, onDelete, onUpdate, onRegister, check }) => {
-  const [localAlbum, setLocalAlbum] = useState(album);
-  const [file, setFile] = useState(null);
+const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister, check  }) => {
+  const [album, setAlbum] = useState({ imgSrc: '', date: '', memo: '' });
 
   useEffect(() => {
-    setLocalAlbum(album);
-  }, [album]);
+    if (isOpen && fileNo) {
+      // fileNo로 데이터를 불러오는 API 호출
+      getFile(fileNo, token)
+        .then((data) => {
+          setAlbum({
+            imgSrc: data.filePath,
+            date: `${data.year}-${data.month}-${data.day}`,
+            memo: data.content,
+          });
+        })
+        .catch((error) => console.error("파일 불러오기 오류:", error));
+    }
+  }, [fileNo, isOpen, token]);
+
+  const handleUpdate = async () => {
+    try {
+      await updateFile(fileNo, {
+        date: album.date,
+        content: album.memo,
+        filePath: album.imgSrc,
+      }, token);
+      onUpdate();  // Trigger update after successful modification
+    } catch (error) {
+      console.error("파일 수정 중 오류:", error);
+    }
+    onClose();
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteFile(fileNo, token);
+      onDelete();  // Trigger deletion after successful operation
+    } catch (error) {
+      console.error("파일 삭제 중 오류:", error);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -64,8 +98,8 @@ const Modal = ({ album, isOpen, onClose, onDelete, onUpdate, onRegister, check }
             <label className="text-gray-700">날짜</label>
             <input
               type="date"
-              value={localAlbum.date}
-              onChange={(e) => setLocalAlbum(prev => ({ ...prev, date: e.target.value }))}
+              value={album.date}
+              onChange={(e) => setAlbum({ ...album, date: e.target.value })}
               className="border p-2 rounded w-full"
             />
           </div>
@@ -75,27 +109,25 @@ const Modal = ({ album, isOpen, onClose, onDelete, onUpdate, onRegister, check }
             <label className="text-gray-700">메모</label>
             <textarea
               placeholder="메모를 입력하세요"
-              value={localAlbum.memo || ''}
-              onChange={(e) => setLocalAlbum(prev => ({ ...prev, memo: e.target.value }))}
+              value={album.memo || ''}
+              onChange={(e) => setAlbum({ ...album, memo: e.target.value })}
               className="border p-2 rounded w-full h-[200px] resize-none"
             />
           </div>
 
           {/* 수정, 삭제 버튼 */}
           <div className="flex justify-end space-x-4">
-            {!check && (
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded"
-                onClick={onDelete}
-              >
-                삭제
-              </button>
-            )}
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded"
-              onClick={handleSubmit}
+              onClick={handleUpdate}
             >
               {check ? '등록' : '수정'}
+            </button>
+            <button
+              className="bg-red-500 text-white px-4 py-2 rounded"
+              onClick={handleDelete}
+            >
+              삭제
             </button>
           </div>
         </div>
