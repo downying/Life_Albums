@@ -11,6 +11,7 @@ const LoginProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [savedUsername, setSavedUsername] = useState(Cookies.get('rememberedId') || ''); // 쿠키에서 저장된 아이디 불러오기
     const [isCheckingLogin, setIsCheckingLogin] = useState(true); // 로그인 상태 확인 중인지 여부
+    const [isLoading, setIsLoading] = useState(false);
 
     const loginCheck = useCallback(async () => {
         console.log("로그인 상태 확인 시작");
@@ -45,16 +46,23 @@ const LoginProvider = ({ children }) => {
     }, []);
 
     const login = async (id, pw, rememberId, navigate) => {
+        setIsLoading(true);
+        setError(null);
+    
         try {
             console.log("로그인 요청 전");
             const response = await api.post('/users/login', { id, pw });
             console.log("로그인 응답 후", response);
+            console.log("응답 데이터:", response.data);  // 응답 데이터를 확인하기 위한 로그
+    
             const data = response.data;
-        
-            if (data && data.accessToken) {  // 서버 응답에서 accessToken을 확인
-                Cookies.set("accessToken", data.accessToken);  // accessToken을 쿠키에 저장
+            
+            if (data && data.accessToken && data.refreshToken) {
+                Cookies.set("accessToken", data.accessToken);
+                Cookies.set("refreshToken", data.refreshToken, { expires: 7, path: '/' });
                 console.log("accessToken 쿠키에 저장됨:", Cookies.get("accessToken"));
-                
+                console.log("refreshToken 쿠키에 저장됨:", Cookies.get("refreshToken"));
+    
                 if (rememberId) {
                     Cookies.set("rememberedId", id, { expires: 7, path: '/' });
                     console.log("rememberedId 쿠키 저장됨:", Cookies.get("rememberedId"));
@@ -62,10 +70,10 @@ const LoginProvider = ({ children }) => {
                     Cookies.remove("rememberedId");
                     console.log("rememberedId 쿠키 삭제됨");
                 }
-        
-                loginSetting(data);  // 로그인 상태 설정
+    
+                loginSetting(data);
                 alert("로그인 성공");
-                navigate(`/albums/users/${data.userNo}`);  // 앨범 페이지로 리다이렉션
+                navigate(`/albums/users/${data.userNo}`);
                 return true;
             } else {
                 console.error("로그인 실패: 서버 응답에 accessToken이 없습니다.");
@@ -76,8 +84,11 @@ const LoginProvider = ({ children }) => {
             console.error("로그인 요청 중 오류:", error);
             setError('서버와의 통신 중 오류가 발생했습니다.');
             return false;
+        } finally {
+            setIsLoading(false);
         }
     };
+    
 
     const logout = (navigate) => {
         if (window.confirm("정말로 로그아웃하시겠습니까?")) {
