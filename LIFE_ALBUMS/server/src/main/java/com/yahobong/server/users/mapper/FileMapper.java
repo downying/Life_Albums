@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yahobong.server.users.dto.FileDTO;
+
 
 @Mapper
 public interface FileMapper {
@@ -18,4 +20,13 @@ public interface FileMapper {
 
     // f.userNo = a.userNo COUNT(*)
     int getTotalThumbnailCountByAlbumNo(int albumsNo);
+
+    // 모달로 파일 조회
+    FileDTO getFileByFileNo(int fileNo);
+
+    // 파일 수정
+    void updateFile(FileDTO fileDTO);
+
+    // 파일 삭제
+    void deleteFile(int fileNo);
 }

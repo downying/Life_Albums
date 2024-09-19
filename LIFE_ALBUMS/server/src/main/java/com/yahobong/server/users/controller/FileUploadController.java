@@ -1,6 +1,7 @@
 package com.yahobong.server.users.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -67,5 +68,26 @@ public class FileUploadController {
         return ResponseEntity.ok(response);
     }
 
+    // 특정 fileNo로 파일 정보 가져오기
+    @GetMapping("/{fileNo}")
+    public ResponseEntity<FileDTO> getFile(@PathVariable int fileNo) {
+        FileDTO file = fileService.getFileByFileNo(fileNo);
+        return new ResponseEntity<>(file, HttpStatus.OK);
+    }
+
+    // 파일 수정
+    @PutMapping("/{fileNo}")
+    public ResponseEntity<?> updateFile(@PathVariable int fileNo, @RequestBody FileDTO fileDto) {
+        fileDto.setFileNo(fileNo);
+        fileService.updateFile(fileDto);
+        return ResponseEntity.ok("파일이 수정되었습니다.");
+    }
+
+    // 파일 삭제
+    @DeleteMapping("/{fileNo}")
+    public ResponseEntity<?> deleteFile(@PathVariable int fileNo) {
+        fileService.deleteFile(fileNo);
+        return ResponseEntity.ok("파일이 삭제되었습니다.");
+    }
 
 }

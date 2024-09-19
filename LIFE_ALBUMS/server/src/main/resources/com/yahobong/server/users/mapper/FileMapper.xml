@@ -39,5 +39,34 @@
         WHERE a.albumsNo = #{albumsNo}
     </select>
 
+    <!-- fileNo로 단일 파일 정보 가져오기 -->
+    <select id="getFileByFileNo" resultType="FileDTO">
+        SELECT 
+            fileNo, albumsNo, content, year, month, day, star, filePath
+        FROM 
+            files
+        WHERE 
+            fileNo = #{fileNo}
+    </select>
+
+    <!-- 파일 수정 -->
+    <update id="updateFile" parameterType="FileDTO">
+        UPDATE files
+        SET 
+            content = #{content},
+            year = #{year},
+            month = #{month},
+            day = #{day},
+            star = #{star},
+            filePath = #{filePath}
+        WHERE 
+            fileNo = #{fileNo}
+    </update>
+
+    <!-- 파일 삭제 -->
+    <delete id="deleteFile" parameterType="int">
+        DELETE FROM files
+        WHERE fileNo = #{fileNo}
+    </delete>
 
 </mapper>

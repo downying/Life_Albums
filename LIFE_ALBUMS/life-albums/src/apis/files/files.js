@@ -20,3 +20,48 @@ export const thumbnails = async (albumsNo, token, page = 1, size = 2) => {
       throw error;
     }
   };
+
+// 파일 조회 (모달)
+export const getFile = async (fileNo, token) => {
+  try {
+    const response = await api.get(`/fileApi/${fileNo}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("파일 가져오는 중 오류 발생:", error);
+    throw error;
+  }
+};
+
+// 파일 수정
+export const updateFile = async (fileNo, fileData, token) => {
+  try {
+      const response = await api.put(`/fileApi/${fileNo}`, fileData, {
+          headers: {
+              Authorization: `Bearer ${token}`,
+          },
+      });
+      return response.data;
+  } catch (error) {
+      console.error('파일 수정 중 오류:', error);
+      throw error;
+  }
+};
+
+// 파일 삭제
+export const deleteFile = async (fileNo, token) => {
+  try {
+      const response = await api.delete(`/fileApi/${fileNo}`, {
+          headers: {
+              Authorization: `Bearer ${token}`,
+          },
+      });
+      return response.data;
+  } catch (error) {
+      console.error('파일 삭제 중 오류:', error);
+      throw error;
+  }
+};
