@@ -60,4 +60,22 @@ public class FileService {
     public int getTotalThumbnailCountByAlbumNo(int albumsNo) {
         return fileMapper.getTotalThumbnailCountByAlbumNo(albumsNo);
     }
+
+    // 모달로 파일 조회
+    @Transactional
+    public FileDTO getFileByFileNo(int fileNo) {
+        return fileMapper.getFileByFileNo(fileNo);
+    }
+
+    // 파일 수정
+    @Transactional
+    public void updateFile(FileDTO fileDto) {
+        fileMapper.updateFile(fileDto);
+    }
+
+    // 파일 삭제
+    @Transactional
+    public void deleteFile(int fileNo) {
+        fileMapper.deleteFile(fileNo);
+    }
 }
