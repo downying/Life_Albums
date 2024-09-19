@@ -27,8 +27,9 @@ const AlbumsPage = () => {
 
   const totalPages = Math.ceil(albums.length / albumsPerPage);
 
-  const handleCalendarClick = () => {
-    setShowDatePicker(!showDatePicker);
+  const handleCalendarIconClick = (e) => {
+    e.stopPropagation(); // 부모 요소의 클릭 이벤트가 발생하지 않도록 방지
+    setShowDatePicker((prevShowDatePicker) => !prevShowDatePicker); // 달력 상태 변경
   };
 
   const indexOfLastAlbum = currentPage * albumsPerPage;
@@ -112,8 +113,12 @@ const AlbumsPage = () => {
             </div>
 
             <div className="absolute right-[-160px] top-0 flex flex-col items-start space-y-4">
-              <button onClick={handleCalendarClick} className="flex items-center space-x-2 relative">
-                <FontAwesomeIcon icon={faCalendarAlt} className="text-black text-xl" />
+              <button className="flex items-center space-x-2 relative">
+                <FontAwesomeIcon
+                  icon={faCalendarAlt}
+                  className="text-black text-xl"
+                  onClick={handleCalendarIconClick} // 아이콘 클릭 시에만 달력 상태 변경
+                />
                 <span className="text-black">+ 사진 추가하기</span>
               </button>
               <Link to="/favorites" className="flex items-center space-x-2">
@@ -147,7 +152,6 @@ const AlbumsPage = () => {
           onUpdate={handleUpdateAlbum}
         />
       )}
-
     </div>
   );
 };
