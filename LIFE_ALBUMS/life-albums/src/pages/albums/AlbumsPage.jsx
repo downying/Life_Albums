@@ -15,20 +15,30 @@ const AlbumsPage = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [albums, setAlbums] = useState([]);
-  const [currentAlbum, setCurrentAlbum] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);  // 모달 상태
+  const [currentAlbum, setCurrentAlbum] = useState(null);  // 선택된 앨범 상태
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [check, setCheck] = useState(false);
-  const albumsPerPage = 2; // 페이지당 표시할 앨범 수
+  const albumsPerPage = 1; // 왼쪽에 하나의 사진만 표시
+
+
+
+  // 임시 데이터로 1개의 앨범이 있다고 가정
+  // const albums = new Array(1).fill({
+  //   date: '2024-08-24',
+  //   imgSrc: '/img/example.jpg',
+  //   memo: '메모 내용'
+  // });
 
   useEffect(() => {
     const fetchThumbnails = async () => {
       try {
         setLoading(true);
-        const data = await thumbnails(6); // albumsNo를 6으로 가정
-        setAlbums(data);
+        const data = await thumbnails(6); // albumsNo를 1로 가정
+        setCurrentAlbum(data);
+        // console.log(data);
+
       } catch (err) {
         setError(err.message);
       } finally {
@@ -37,14 +47,18 @@ const AlbumsPage = () => {
     };
 
     fetchThumbnails();
+
   }, []);
 
-  const totalPages = Math.ceil(albums.length / albumsPerPage);
+
+
+  const totalPages = Math.ceil(currentAlbum?.length / albumsPerPage);
 
   const handleCalendarIconClick = (e) => {
-    e.stopPropagation();
-    setShowDatePicker((prevShowDatePicker) => !prevShowDatePicker);
+    e.stopPropagation(); // 부모 요소의 클릭 이벤트가 발생하지 않도록 방지
+    setShowDatePicker((prevShowDatePicker) => !prevShowDatePicker); // 달력 상태 변경
   };
+
 
   const onPageChange = (pageNumber) => {
     if (pageNumber > 0 && pageNumber <= totalPages) {
@@ -52,44 +66,40 @@ const AlbumsPage = () => {
     }
   };
 
-  const handleImageClick = (album) => {
-    setCurrentAlbum(album);
-    setIsModalOpen(true);
-    setCheck(false);
+  const handleImageClick = () => {
+    setCurrentAlbum(currentAlbum);  // 선택된 앨범 데이터를 설정
+    setIsModalOpen(true);  // 모달 열기
+    setCheck(false)
   };
 
   const handleNoImageClick = () => {
-    setCurrentAlbum(null);
-    setIsModalOpen(true);
-    setCheck(true);
+    setCurrentAlbum(currentAlbum);  // 선택된 앨범 데이터를 설정
+    setIsModalOpen(true);  // 모달 열기
+    setCheck(true)
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setCurrentAlbum(null);
+    setIsModalOpen(false);  // 모달 닫기
   };
 
   const handleDeleteAlbum = () => {
     console.log('앨범 삭제');
     setIsModalOpen(false);
-    // TODO: 실제 삭제 로직 구현
   };
 
   const handleUpdateAlbum = (updatedAlbum) => {
     console.log('앨범 수정:', updatedAlbum);
-    // TODO: 실제 업데이트 로직 구현
-    setAlbums(albums.map(album => 
-      album.id === updatedAlbum.id ? updatedAlbum : album
-    ));
-    setIsModalOpen(false);
+    setCurrentAlbum(updatedAlbum);
   };
 
+  //INSERT INTO files (albumsNo, content, year, month, day, star, filePath)
+  //VALUES (#{albumsNo}, #{content}, #{year}, #{month}, #{day}, #{star}, #{filePath})
   const handleRegisterAlbum = async (newAlbum) => {
     try {
       const formData = new FormData();
       formData.append('file', newAlbum.file);
       formData.append('data', JSON.stringify({
-        albumsNo: 6, // 적절한 앨범 번호를 설정해야 합니다.
+        albumsNo: 1, // 적절한 앨범 번호를 설정해야 합니다.
         content: newAlbum.memo,
         year: new Date(newAlbum.date).getFullYear(),
         month: new Date(newAlbum.date).getMonth() + 1,
@@ -97,12 +107,9 @@ const AlbumsPage = () => {
         star: false, // 필요에 따라 수정
       }));
 
-      const token = 'your_auth_token_here'; // 실제 인증 토큰으로 교체해야 합니다.
+      const token = 'Content-Type: multipart/form-data'; // 실제 인증 토큰으로 교체해야 합니다.
       const result = await fileInsert(formData, token);
       console.log('앨범 등록 성공:', result);
-      // 성공 후 앨범 목록을 다시 불러옵니다.
-      const updatedAlbums = await thumbnails(6);
-      setAlbums(updatedAlbums);
       handleCloseModal();
     } catch (error) {
       console.error('앨범 등록 실패:', error);
@@ -110,45 +117,50 @@ const AlbumsPage = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-
   return (
-    <div className="flex flex-col min-h-[calc(100vh-116px)] relative">
+    <div className="flex flex-col min-h-[calc(100vh-116px)] relative"> {/* 페이지 높이를 100vh-116px로 설정 */}
       <div className="flex flex-grow">
-        <Sidebar />
+        <Sidebar /> {/* 사이드바 추가 */}
 
         <div className="flex-grow flex flex-col items-center justify-center bg-gray-100 p-4">
           <div className="relative flex items-center">
             <div className="relative flex items-center">
               <NavigationButton
                 direction="left"
-                onClick={() => onPageChange(currentPage - 1)}
+                onClick={() => console.log('Left Clicked')}
                 className="absolute left-[-60px] top-[50%] transform -translate-y-1/2 text-7xl text-black z-10 bg-white p-4 rounded-full shadow-lg border-none outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0"
               />
 
-              <div className="relative w-[900px] h-[600px]">
+              <div className="relative w-[900px] h-[600px]"> {/* 앨범 크기를 키움 */}
                 <div className="absolute left-[-10px] top-0 w-[30px] h-full bg-gray-300 rounded-l-[10px] z-0"></div>
                 <div className="absolute bottom-[-10px] left-0 w-full h-[30px] bg-gray-300 rounded-b-[10px] z-0"></div>
 
                 <div className="relative w-full h-full bg-white border-4 border-black rounded-[20px] shadow-2xl flex overflow-hidden z-10">
-                  {albums.length === 0 ? (
-                    <div className="relative w-full h-full bg-white flex justify-center items-center p-6 shadow-inner">
-                      <AddPhotoButton onClick={handleNoImageClick} />
-                    </div>
-                  ) : albums.length === 1 ? (
+                  {currentAlbum ? (
+                    <>
+                      <div className="relative w-full h-full bg-white flex justify-center items-center p-6 shadow-inner">
+                        <AddPhotoButton onClick={() => handleNoImageClick()} />
+                      </div>
+                      <div className="relative w-[30px] h-full bg-gray-300 flex justify-center items-center shadow-inner">
+                        <div className="w-[2px] h-[90%] bg-black"></div>
+                      </div>
+                      <div className="relative w-full h-full bg-white flex justify-center items-center p-6 shadow-inner">
+
+                      </div>
+                    </>
+                  ) : currentAlbum?.length === 1 ? (
                     <>
                       <div className="relative w-1/2 h-full bg-white flex flex-col justify-center items-center border-r-4 border-black p-6 shadow-inner">
                         <div className="relative">
                           <img
-                            src={albums[0].imgSrc}
+                            src={currentAlbum[0].imgSrc}
                             alt="Album"
                             className="w-[300px] h-[400px] object-cover rounded-lg shadow-md cursor-pointer"
-                            onClick={() => handleImageClick(albums[0])}
+                            onClick={() => handleImageClick()}
                           />
                           <div className="flex items-center mt-4">
                             <FontAwesomeIcon icon={faHeart} className="text-red-500 mr-2" />
-                            <span className="text-sm">{albums[0].date}</span>
+                            <span className="text-sm">{currentAlbum[0].date}</span>
                           </div>
                         </div>
                       </div>
@@ -156,12 +168,12 @@ const AlbumsPage = () => {
                         <div className="w-[2px] h-[90%] bg-black"></div>
                       </div>
                       <div className="relative w-1/2 h-full bg-white flex justify-center items-center p-6 shadow-inner">
-                        <AddPhotoButton onClick={handleNoImageClick} />
+                        <AddPhotoButton onClick={() => handleNoImageClick()} />
                       </div>
                     </>
                   ) : (
-                    albums.slice((currentPage - 1) * albumsPerPage, currentPage * albumsPerPage).map((item, index) => (
-                      <React.Fragment key={item.id}>
+                    currentAlbum?.map((item, index) => (
+                      <React.Fragment key={index}>
                         <div className="relative w-1/2 h-full bg-white flex flex-col justify-center items-center border-r-4 border-black p-6 shadow-inner">
                           <div className="relative">
                             <img
@@ -189,7 +201,7 @@ const AlbumsPage = () => {
 
               <NavigationButton
                 direction="right"
-                onClick={() => onPageChange(currentPage + 1)}
+                onClick={() => console.log('Right Clicked')}
                 className="absolute right-[-60px] top-[50%] transform -translate-y-1/2 text-7xl text-black z-10 bg-white p-4 rounded-full shadow-lg border-none outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0"
               />
             </div>
@@ -199,7 +211,7 @@ const AlbumsPage = () => {
                 <FontAwesomeIcon
                   icon={faCalendarAlt}
                   className="text-black text-xl"
-                  onClick={handleCalendarIconClick}
+                  onClick={handleCalendarIconClick} // 아이콘 클릭 시에만 달력 상태 변경
                 />
                 <span className="text-black">+ 사진 추가하기</span>
               </button>
@@ -224,7 +236,8 @@ const AlbumsPage = () => {
         </div>
       </div>
 
-      {isModalOpen && (
+      {/* 모달 창 */}
+      {currentAlbum && (
         <Modal
           album={currentAlbum}
           isOpen={isModalOpen}
