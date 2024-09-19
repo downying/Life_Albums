@@ -21,7 +21,12 @@ const JoinForm = () => {
   const [idExists, setIdExists] = useState(null);
   const [mailExists, setMailExists] = useState(null);
   const [formError, setFormError] = useState('');
-  
+  const [isMailValid, setIsMailValid] = useState(false); // 이메일 유효성 여부 상태 추가
+
+  // 정규식 정의
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^01[016789]\d{7,8}$/;  // 한국 핸드폰 번호 형식
+
   // ID 중복 확인
   const handleCheckId = async () => {
     if (!id) {
@@ -45,6 +50,11 @@ const JoinForm = () => {
   const handleCheckMail = async () => {
     if (!mail) {
       alert('이메일을 입력해주세요.');
+      return;
+    }
+    // 이메일 유효성 검사
+    if (!isMailValid) {
+      alert('유효한 이메일 주소를 입력해주세요.');
       return;
     }
     try {
@@ -85,6 +95,12 @@ const JoinForm = () => {
       return;
     }
 
+    // 핸드폰 번호 유효성 검사
+    if (!phoneRegex.test(phone)) {
+      setFormError('유효한 핸드폰 번호를 입력해주세요. (숫자만 입력)');
+      return;
+    }
+
     // 비밀번호 일치 확인
     if (pw !== pwCheck) {
       setFormError('비밀번호가 일치하지 않습니다.');
@@ -110,6 +126,14 @@ const JoinForm = () => {
         console.error('회원가입 오류:', error);
       }
     }
+  };
+
+  // 이메일 입력 시 유효성 검사
+  const handleMailChange = (e) => {
+    const value = e.target.value;
+    setMail(value);
+    setIsMailValid(emailRegex.test(value)); // 이메일 유효성 검사 결과 저장
+    setMailExists(null); // 이메일이 변경되면 중복 확인 초기화
   };
 
   return (
@@ -165,12 +189,10 @@ const JoinForm = () => {
           type="email"
           placeholder="E-MAIL"
           value={mail}
-          onChange={(e) => {
-            setMail(e.target.value);
-            setMailExists(null); // 이메일이 변경되면 중복 확인 초기화
-          }}
+          onChange={handleMailChange} // 이메일 유효성 검사 포함
           checkLabel="중복 확인"
           onCheckClick={handleCheckMail} // onCheckClick로 연결 변경
+          disabled={!isMailValid}  // 이메일 유효성 검사 통과 시에만 중복 확인 가능
         />
       </div>
 
