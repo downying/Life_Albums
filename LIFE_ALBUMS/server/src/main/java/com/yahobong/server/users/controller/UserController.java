@@ -75,33 +75,43 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    @ResponseBody
-    public ResponseEntity<?> handleLogin(@RequestBody Users loginRequest, HttpServletResponse response) {
-        try {
-            boolean loginSuccess = userService.login(loginRequest);
+@ResponseBody
+public ResponseEntity<?> handleLogin(@RequestBody Users loginRequest, HttpServletResponse response) {
+    try {
+        boolean loginSuccess = userService.login(loginRequest);
 
-            if (loginSuccess) {
-                Users loggedInUser = userService.selectById(loginRequest.getId());
+        if (loginSuccess) {
+            Users loggedInUser = userService.selectById(loginRequest.getId());
 
-                // JWT 토큰 생성
-                String accessToken = jwtTokenProvider.createToken(loggedInUser.getUserNo(), loggedInUser.getId());
+            // JWT accessToken 및 refreshToken 생성
+            String accessToken = jwtTokenProvider.createToken(loggedInUser.getUserNo(), loggedInUser.getId());
+            String refreshToken = jwtTokenProvider.createRefreshToken(loggedInUser.getUserNo(), loggedInUser.getId());
 
-                // 로그인 성공 시 사용자 정보와 accessToken 반환
-                Map<String, Object> responseBody = new HashMap<>();
-                responseBody.put("userNo", loggedInUser.getUserNo());
-                responseBody.put("username", loggedInUser.getId());
-                responseBody.put("message", "Login successful");
-                responseBody.put("accessToken", accessToken);  // JWT 토큰 추가
+            // 로그인 성공 시 사용자 정보와 accessToken, refreshToken 반환
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("userNo", loggedInUser.getUserNo());
+            responseBody.put("username", loggedInUser.getId());
+            responseBody.put("message", "Login successful");
+            responseBody.put("accessToken", accessToken);  // JWT accessToken 추가
+            responseBody.put("refreshToken", refreshToken);  // JWT refreshToken 추가
 
-                return ResponseEntity.ok().body(responseBody);
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.");
-            }
-        } catch (Exception e) {
-            log.error("로그인 실패: ", e);
+            // refreshToken을 HttpOnly 쿠키로 설정하여 클라이언트로 전송
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setMaxAge(60 * 60 * 24 * 7);  // 7일간 유효
+            refreshTokenCookie.setPath("/");  // 전체 경로에 대해 유효
+            response.addCookie(refreshTokenCookie);  // 응답에 쿠키 추가
+
+            return ResponseEntity.ok().body(responseBody);
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.");
         }
+    } catch (Exception e) {
+        log.error("로그인 실패: ", e);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.");
     }
+}
+
 
 
 

@@ -38,22 +38,36 @@ public class JwtTokenProvider {
     private UserMapper userMapper;
 
     /*
-     * 👩‍💼➡🔐 토큰 생성 (기존 메소드)
+     * 👩‍💼➡🔐 accessToken 생성 메소드
      */
     public String createToken(int userNo, String id) {
         byte[] signingKey = getSigningKey();
     
-        // JWT 토큰 생성
+        // JWT accessToken 생성
         return Jwts.builder()
             .setSubject(id)  // 사용자 ID를 주제로 설정
             .claim("uno", userNo)  // 사용자 번호 클레임 추가
             .claim("uid", id)  // 사용자 ID 클레임 추가
+            .setExpiration(new Date(System.currentTimeMillis() + 86400000))  // 만료 시간 설정 (1일)
+            .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS512)  // 서명 설정
+            .compact();
+    }
+
+    /*
+     * 🔐➡ refreshToken 생성 메소드 (새로 추가)
+     */
+    public String createRefreshToken(int userNo, String id) {
+        byte[] signingKey = getSigningKey();
+    
+        // JWT refreshToken 생성
+        return Jwts.builder()
+            .setSubject(id)  // 사용자 ID를 주제로 설정
+            .claim("uno", userNo)  // 사용자 번호 클레임 추가
             .setExpiration(new Date(System.currentTimeMillis() + 864000000))  // 만료 시간 설정 (10일)
             .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS512)  // 서명 설정
             .compact();
     }
-    
-    
+
     /**
      * 🔐➡👩‍💼 토큰 해석
      * 
@@ -75,10 +89,8 @@ public class JwtTokenProvider {
 
             // 🔐➡👩‍💼 JWT 파싱
             Jws<Claims> parsedToken = Jwts.parser()
-                                            //   .setSigningKey(getShaKey())
                                             .verifyWith(getShaKey())
                                             .build()
-                                            //   .parseClaimsJws(jwt);   
                                             .parseSignedClaims(jwt);  
 
             log.info("parsedToken : " + parsedToken);
@@ -101,8 +113,7 @@ public class JwtTokenProvider {
             user.setUserNo(no);
             user.setId(userId);
 
-            // 토큰 유효하면
-            // DB에서 추가 정보 가져오기
+            // 토큰 유효하면 DB에서 추가 정보 가져오기
             try {
                 Users userInfo = userMapper.login(userId);
                 if(userInfo != null) {
@@ -144,28 +155,14 @@ public class JwtTokenProvider {
         try {
             // 🔐➡👩‍💼 JWT 파싱
             Jws<Claims> claims = Jwts.parser()
-                                 //  .setSigningKey(getShaKey())
                                      .verifyWith(getShaKey())
                                      .build()
-                                 //  .parseClaimsJws(jwt);
                                      .parseSignedClaims(jwt);
 
             log.info("::::: 토큰 만료기간 :::::");
-            // log.info("-> " + claims.getBody().getExpiration());
             log.info("-> " + claims.getPayload().getExpiration());
-            /*
-                PAYLOAD
-                {
-                    "exp": 1703140095,        ⬅ 만료기한 추출
-                    "uid": "joeun",
-                    "rol": [
-                        "ROLE_USER"
-                    ]   
-                }
-            */
             
-            // return !claims.getBody().getExpiration().before(new Date());
-            return !claims.getPayload().getExpiration().before(new Date()); // 현재날짜가 만료날짜보다 더 최근 인지 판단
+            return !claims.getPayload().getExpiration().before(new Date()); // 만료 여부 판단
         } catch (ExpiredJwtException exception) {
             log.error("Token Expired");  // 토큰 만료 
             return false;
@@ -189,6 +186,4 @@ public class JwtTokenProvider {
     private SecretKey getShaKey() {
         return Keys.hmacShaKeyFor(getSigningKey());
     }
-    
-
 }

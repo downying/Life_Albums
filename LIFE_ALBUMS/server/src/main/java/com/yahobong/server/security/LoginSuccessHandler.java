@@ -38,26 +38,25 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
         
         log.info("로그인 인증 성공...");
 
-        // 아이디 저장
-        String rememberId = request.getParameter("remember-id"); // 아이디 저장 여부
-        String userId = request.getParameter("userId"); // 아이디
+        // 아이디 저장 로직
+        String rememberId = request.getParameter("remember-id");
+        String userId = request.getParameter("userId");
         log.info("rememberId : " + rememberId);
         log.info("userId : " + userId);
 
-        // ✅ 아이디 저장 체크
         if (rememberId != null && rememberId.equals("on")) {
             Cookie cookie = new Cookie("remember-id", userId);
-            cookie.setMaxAge(60 * 60 * 24 * 7); // 유효기간 : 7일
-            cookie.setPath("/"); // 쿠키 적용 경로 지정
-            response.addCookie(cookie); // 응답에 쿠키 등록
+            cookie.setMaxAge(60 * 60 * 24 * 7); // 7일 유효
+            cookie.setPath("/");
+            response.addCookie(cookie);
         } else {
             Cookie cookie = new Cookie("remember-id", "");
-            cookie.setMaxAge(0); // 유효기간 : 만료
-            cookie.setPath("/"); // 쿠키 적용 경로 지정
-            response.addCookie(cookie); // 응답에 쿠키 등록
+            cookie.setMaxAge(0);
+            cookie.setPath("/");
+            response.addCookie(cookie);
         }
 
-        // 인증된 사용자 정보 - (아이디/패스워드/권한)
+        // 인증된 사용자 정보
         CustomUser customUser;
         if (authentication.getPrincipal() instanceof CustomUser) {
             customUser = (CustomUser) authentication.getPrincipal();
@@ -66,7 +65,6 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
         }
 
         log.info("아이디 : " + customUser.getUsername());
-        log.info("패스워드 : " + customUser.getPassword()); // 보안상 노출❌
         log.info("권한 : " + customUser.getAuthorities());
 
         HttpSession session = request.getSession();
@@ -74,13 +72,32 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
         if (user != null) session.setAttribute("user", user);
 
         // JWT 토큰 생성
-        int userNo = customUser.getUser().getUserNo(); // Users 객체에서 userNo를 가져옵니다.
-        String token = jwtTokenProvider.createToken(userNo, customUser.getUsername());
+        int userNo = customUser.getUser().getUserNo();
+        String accessToken = jwtTokenProvider.createToken(userNo, customUser.getUsername());
+        String refreshToken = jwtTokenProvider.createRefreshToken(userNo, customUser.getUsername());
 
-        // 클라이언트로 리디렉션 시 토큰을 포함하여 전달
-        String redirectUrl = "http://localhost:3000/oauth2/redirect?token=" + token;
+        // JWT 토큰 저장 로그 확인
+        log.info("accessToken: {}", accessToken);
+        log.info("refreshToken: {}", refreshToken);
+
+        // 쿠키에 JWT 토큰 저장
+        Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+        accessTokenCookie.setMaxAge(60 * 60); // 1시간 유효
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setHttpOnly(true); // 쿠키를 HttpOnly로 설정 (JavaScript에서 접근 불가)
+        response.addCookie(accessTokenCookie);
+
+        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+        refreshTokenCookie.setMaxAge(60 * 60 * 24 * 7); // 7일 유효
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setHttpOnly(true); // HttpOnly 설정
+        refreshTokenCookie.setSecure(false);  // HTTPS에서만 동작하도록 설정, 개발 시에는 false로 테스트
+        response.addCookie(refreshTokenCookie);
+
+        log.info("JWT 쿠키 추가 완료");
+
+        // 리디렉션
+        String redirectUrl = "http://localhost:3000/oauth2/redirect?token=" + accessToken;
         response.sendRedirect(redirectUrl);
-
-        //super.onAuthenticationSuccess(request, response, authentication);
     }
 }
