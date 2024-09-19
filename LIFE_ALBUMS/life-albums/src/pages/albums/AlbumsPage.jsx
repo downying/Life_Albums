@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import NavigationButton from '../../components/albums/NavigationButton';
@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import Pagination from '../../components/albums/Pagenation';
 import Sidebar from '../../components/albums/Sidebar';
 import Modal from '../../components/albums/Modal';
+import { thumbnails } from '../../apis/files/files';
 
 const AlbumsPage = () => {
   const [startDate, setStartDate] = useState(new Date());
@@ -16,7 +17,12 @@ const AlbumsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);  // 모달 상태
   const [currentAlbum, setCurrentAlbum] = useState(null);  // 선택된 앨범 상태
+  const [albumData, setAlbumData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const albumsPerPage = 1; // 왼쪽에 하나의 사진만 표시
+
+
 
   // 임시 데이터로 1개의 앨범이 있다고 가정
   const albums = new Array(1).fill({
@@ -24,6 +30,26 @@ const AlbumsPage = () => {
     imgSrc: '/img/example.jpg',
     memo: '메모 내용'
   });
+
+  useEffect(() => {
+    const fetchThumbnails = async () => {
+      try {
+        setLoading(true);
+        const data = await thumbnails(6); // albumsNo를 1로 가정
+        setAlbumData(data);
+        // console.log(data);
+        
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchThumbnails();
+  }, []);
+    
+  
 
   const totalPages = Math.ceil(albums.length / albumsPerPage);
 

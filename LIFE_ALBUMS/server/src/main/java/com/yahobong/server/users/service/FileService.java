@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 @Service
 public class FileService {
@@ -37,11 +38,26 @@ public class FileService {
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
         
         // 파일 저장
+        Path filePath = root.resolve(fileName);
         Files.copy(file.getInputStream(), root.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+
+         // filePath 설정
+        fileDto.setFilePath(filePath.toString());
 
         // 파일 정보를 데이터베이스에 저장
         fileMapper.insertFile(fileDto);
 
         return fileDto;
+    }
+
+    @Transactional
+    public List<FileDTO> getThumbnailsByAlbumNo(int albumsNo, int page, int size) {
+        int offset = (page - 1) * size;
+        return fileMapper.getThumbnailsByAlbumNo(albumsNo, offset, size);
+    }
+
+    @Transactional
+    public int getTotalThumbnailCountByAlbumNo(int albumsNo) {
+        return fileMapper.getTotalThumbnailCountByAlbumNo(albumsNo);
     }
 }

@@ -1,3 +1,8 @@
+DROP TABLE files;
+DROP TABLE albums;
+DROP TABLE users;
+
+
 -- users 테이블
 CREATE TABLE `users` (
     `userNo`  INT           NOT NULL AUTO_INCREMENT,
@@ -28,6 +33,11 @@ CREATE TABLE `files` (
     `day`       INT            NULL,
     `star`      INT            NULL,
     `regDate`   TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `filePath`  VARCHAR(255)   NOT NULL,
     PRIMARY KEY (`fileNo`),
     FOREIGN KEY (`albumsNo`) REFERENCES `albums`(`albumsNo`) ON UPDATE CASCADE ON DELETE CASCADE
 ) COMMENT='사진';
+
+-- 아이디 : user 비밀번호: 123456
+INSERT INTO users (id, pw, name, mail, phone)
+VALUES ('user', '$2a$12$TrN..KcVjciCiz.5Vj96YOBljeVTTGJ9AUKmtfbGpgc9hmC7BxQ92', '야호봉','asdf123@naver.com', '01077884455');

@@ -6,8 +6,38 @@
 <mapper namespace="com.yahobong.server.users.mapper.FileMapper">
 
     <insert id="insertFile" parameterType="com.yahobong.server.users.dto.FileDTO" useGeneratedKeys="true" keyProperty="fileNo">
-        INSERT INTO files (albumsNo, content, year, month, day, star)
-        VALUES (#{albumsNo}, #{content}, #{year}, #{month}, #{day}, #{star})
+        INSERT INTO files (albumsNo, content, year, month, day, star, filePath)
+        VALUES (#{albumsNo}, #{content}, #{year}, #{month}, #{day}, #{star}, #{filePath})
     </insert>
     
+    <select id="getThumbnailsByAlbumNo" resultType="com.yahobong.server.users.dto.FileDTO">
+        SELECT 
+            f.fileNo, 
+            f.albumsNo, 
+            f.content, 
+            f.year, 
+            f.month, 
+            f.day, 
+            f.star, 
+            f.filePath
+        FROM 
+            files f
+        INNER JOIN 
+            albums a ON f.albumsNo = a.albumsNo
+        WHERE 
+            a.albumsNo = #{albumsNo}
+        ORDER BY 
+            f.fileNo ASC
+        LIMIT 
+            #{offset}, #{limit}
+    </select>
+    
+    <select id="getTotalThumbnailCountByAlbumNo" resultType="int">
+        SELECT COUNT(*)
+        FROM files f
+        INNER JOIN albums a ON f.albumsNo = a.albumsNo
+        WHERE a.albumsNo = #{albumsNo}
+    </select>
+
+
 </mapper>
