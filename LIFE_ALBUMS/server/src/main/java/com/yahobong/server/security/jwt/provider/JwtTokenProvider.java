@@ -58,16 +58,16 @@ public class JwtTokenProvider {
      */
     public String createRefreshToken(int userNo, String id) {
         byte[] signingKey = getSigningKey();
-    
+        
         // JWT refreshToken 생성
         return Jwts.builder()
             .setSubject(id)  // 사용자 ID를 주제로 설정
             .claim("uno", userNo)  // 사용자 번호 클레임 추가
-            .setExpiration(new Date(System.currentTimeMillis() + 864000000))  // 만료 시간 설정 (10일)
+            .setExpiration(new Date(System.currentTimeMillis() + 864000000))  // 만료 시간 설정 (현재 10일)
             .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS512)  // 서명 설정
             .compact();
     }
-
+    
     /**
      * 🔐➡👩‍💼 토큰 해석
      * 
