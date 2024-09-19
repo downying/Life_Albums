@@ -41,10 +41,10 @@ const AppRoutes = () => {
     
         if (!publicRoutes.includes(currentLocation.pathname)) {
             if (isLoggedIn && userInfo) {
-                // 로그인한 사용자의 userNo를 경로에 포함하여 이동
-                if (!currentLocation.pathname.includes(`/albums/users/${userInfo.userNo}`)) {
-                    navigate(`/albums/users/${userInfo.userNo}`);
-                }
+              const userPath = `/albums/users/${userInfo.userNo}`;
+              if (currentLocation.pathname !== userPath) {
+                  navigate(userPath);
+              }
             } else {
                 navigate('/login');
             }
