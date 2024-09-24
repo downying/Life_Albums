@@ -14,7 +14,7 @@ public interface UserMapper {
     // 회원 조회 - id
     public Users selectById(String id) throws Exception;
 
-    // 회원 조회 - mail
+    // 회원 조회 - 이메일
     public Users selectByEmail(String mail) throws Exception;
 
     // 회원 가입
@@ -29,16 +29,9 @@ public interface UserMapper {
     // 아이디 찾기
     public String findId(@Param("name") String name, @Param("mail") String mail, @Param("phone") String phone) throws Exception;
 
-    // 비밀번호 찾기 1. 인증번호 생성 및 저장
-    int generateResetToken(@Param("id") String id, @Param("name") String name, @Param("mail") String mail, @Param("resetToken") String resetToken) throws Exception;
-
-    // 비밀번호 찾기 2. 인증번호 검증
-    int verifyResetToken(@Param("id") String id, @Param("resetToken") String resetToken) throws Exception;
-
-    // 비밀번호 찾기 3. 비밀번호 변경 페이지로 이동
-    int clearResetToken(@Param("id") String id, @Param("resetToken") String resetToken) throws Exception;
-
     // 비밀번호 변경
     int updatePw(@Param("id") String id, @Param("pw") String pw) throws Exception;
 
+    // 이름, 아이디, 이메일을 기반으로 사용자 정보 검증
+    public Users verifyUserInfo(@Param("name") String name, @Param("id") String id, @Param("mail") String mail) throws Exception;
 }

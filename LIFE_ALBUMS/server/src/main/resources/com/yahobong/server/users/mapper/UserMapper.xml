@@ -13,8 +13,6 @@
         <result property="name" column="name" />
         <result property="mail" column="mail" />
         <result property="phone" column="phone" javaType="String"/> 
-        <result property="resetToken" column="resetToken" javaType="String"/> 
-        <result property="resetTokenExpiry" column="resetTokenExpiry" javaType="java.util.Date"/> 
     </resultMap>
 
     <!-- 로그인 -->
@@ -71,33 +69,11 @@
           AND phone = #{phone}
     </select>
 
-    <!-- 비밀번호 찾기 1. 인증번호 생성 및 저장 -->
-    <update id="generateResetToken">
-        UPDATE users
-          SET reset_token = #{resetToken}, 
-              reset_token_expiry = DATE_ADD(NOW(), INTERVAL 5 MINUTE)
-        WHERE id = #{id} 
-          AND name = #{name} 
-          AND mail = #{mail}
-    </update>
-
-    <!-- 비밀번호 찾기 2. 인증번호 검증 -->
-    <select id="verifyResetToken" resultType="int">
-        SELECT COUNT(*)
-        FROM users
-        WHERE id = #{id}
-          AND reset_token = #{resetToken}
-          AND reset_token_expiry > NOW()
+    <!-- 이름, 아이디, 이메일을 기반으로 사용자 정보 검증 -->
+    <select id="verifyUserInfo" resultMap="userMap">
+        SELECT * FROM users
+        WHERE name = #{name} AND id = #{id} AND mail = #{mail}
     </select>
-    
-    <!-- 비밀번호 찾기 3. 인증번호 무효화 -->
-    <update id="clearResetToken">
-        UPDATE users
-        SET reset_token = NULL, 
-            reset_token_expiry = NULL
-        WHERE id = #{id} 
-        AND reset_token = #{resetToken}
-    </update>
 
     <!-- 비밀번호 변경 -->
     <update id="updatePw">

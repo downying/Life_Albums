@@ -24,16 +24,10 @@ public interface UserService {
 
     // 아이디 찾기
     public String findId(String name, String mail, String phone) throws Exception;
-    
-    // 비밀번호 찾기 1. 인증번호 생성 및 저장
-    public boolean generateResetToken(String id, String name, String mail, String resetToken) throws Exception;
 
-    // 비밀번호 찾기 2. 인증번호 검증
-    public boolean verifyResetToken(String id, String resetToken) throws Exception;
+    // 이름, 아이디, 이메일이 일치하는지 확인하는 메서드
+    public boolean verifyUserInfo(String name, String id, String mail) throws Exception;
 
-    // 비밀번호 찾기 3. 비밀번호 변경 페이지로 이동
-    public boolean clearResetToken(String id, String resetToken) throws Exception;
-
-    // 비밀번호 변경
-    public boolean updatePw(String id, String pw) throws Exception;
+    // 비밀번호 업데이트
+    public void updatePw(Users user) throws Exception;
 }

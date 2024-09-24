@@ -2,17 +2,14 @@ package com.yahobong.server.users.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -24,7 +21,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+import com.yahobong.server.users.service.EmailService;
 import com.yahobong.server.users.service.UserService;
 import com.yahobong.server.users.dto.Users;
 import com.yahobong.server.security.jwt.provider.JwtTokenProvider;
@@ -33,23 +32,22 @@ import com.yahobong.server.users.dto.CustomUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
 @Slf4j
 @Controller
 @CrossOrigin(origins = "*")
 @RequestMapping("/users")
 public class UserController {
-    
+
     @Autowired
     private UserService userService;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private EmailService emailService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
 
-     @Autowired
+    @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/login")
@@ -57,89 +55,65 @@ public class UserController {
         @CookieValue(value = "remember-id", required = false) Cookie cookie,
         Model model
     ) {
-        log.info("로그인...");
-
-        String id = "";                 // 저장된 아이디
-        boolean rememberId = false;     // 아이디 저장 체크 여부
+        String id = "";
+        boolean rememberId = false;
 
         if (cookie != null) {
-            log.info("CookieName : " + cookie.getName());
-            log.info("CookieValue : " + cookie.getValue());
             id = cookie.getValue();
             rememberId = true;
         }
 
-        model.addAttribute("id", id);  // 'id'를 모델에 추가
-        model.addAttribute("rememberId", rememberId);  // 'rememberId'를 모델에 추가
-        return "/users/login";  // 로그인 페이지의 뷰 이름 반환
+        model.addAttribute("id", id);
+        model.addAttribute("rememberId", rememberId);
+        return "/users/login";
     }
 
     @PostMapping("/login")
-@ResponseBody
-public ResponseEntity<?> handleLogin(@RequestBody Users loginRequest, HttpServletResponse response) {
-    try {
-        boolean loginSuccess = userService.login(loginRequest);
+    @ResponseBody
+    public ResponseEntity<?> handleLogin(@RequestBody Users loginRequest, HttpServletResponse response) {
+        try {
+            boolean loginSuccess = userService.login(loginRequest);
 
-        if (loginSuccess) {
-            Users loggedInUser = userService.selectById(loginRequest.getId());
+            if (loginSuccess) {
+                Users loggedInUser = userService.selectById(loginRequest.getId());
 
-            // JWT accessToken 및 refreshToken 생성
-            String accessToken = jwtTokenProvider.createToken(loggedInUser.getUserNo(), loggedInUser.getId());
-            String refreshToken = jwtTokenProvider.createRefreshToken(loggedInUser.getUserNo(), loggedInUser.getId());
+                String accessToken = jwtTokenProvider.createToken(loggedInUser.getUserNo(), loggedInUser.getId());
+                String refreshToken = jwtTokenProvider.createRefreshToken(loggedInUser.getUserNo(), loggedInUser.getId());
 
-            // 로그인 성공 시 사용자 정보와 accessToken, refreshToken 반환
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("userNo", loggedInUser.getUserNo());
-            responseBody.put("username", loggedInUser.getId());
-            responseBody.put("message", "Login successful");
-            responseBody.put("accessToken", accessToken);  // JWT accessToken 추가
-            responseBody.put("refreshToken", refreshToken);  // JWT refreshToken 추가
+                Map<String, Object> responseBody = new HashMap<>();
+                responseBody.put("userNo", loggedInUser.getUserNo());
+                responseBody.put("username", loggedInUser.getId());
+                responseBody.put("message", "Login successful");
+                responseBody.put("accessToken", accessToken);
+                responseBody.put("refreshToken", refreshToken);
 
-            // refreshToken을 HttpOnly 쿠키로 설정하여 클라이언트로 전송
-            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-            refreshTokenCookie.setHttpOnly(true);
-            refreshTokenCookie.setMaxAge(60 * 60 * 24 * 7);  // 7일간 유효
-            refreshTokenCookie.setPath("/");  // 전체 경로에 대해 유효
-            response.addCookie(refreshTokenCookie);  // 응답에 쿠키 추가
+                Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+                refreshTokenCookie.setHttpOnly(true);
+                refreshTokenCookie.setMaxAge(60 * 60 * 24 * 7);  // 7일간 유효
+                refreshTokenCookie.setPath("/");
+                response.addCookie(refreshTokenCookie);
 
-            return ResponseEntity.ok().body(responseBody);
-        } else {
+                return ResponseEntity.ok().body(responseBody);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.");
+            }
+        } catch (Exception e) {
+            log.error("로그인 실패: ", e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.");
         }
-    } catch (Exception e) {
-        log.error("로그인 실패: ", e);
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: ID 또는 비밀번호가 올바르지 않습니다.");
     }
-}
 
-
-
-
-    /**
-     * 사용자 정보 조회
-     * @param customUser
-     * @return
-     */
     @GetMapping("/info")
     public ResponseEntity<?> userInfo(@AuthenticationPrincipal CustomUser customUser) {
-        
-        log.info("::::: customUser :::::");
-        log.info("customUser : "+ customUser);
-
         Users user = customUser.getUser();
-        log.info("user : " + user);
 
-        // 인증된 사용자 정보 
-        if( user != null ) {
-            log.info("인증성공");
+        if (user != null) {
             return new ResponseEntity<>(user, HttpStatus.OK);
         }
 
-        // 인증 되지 않음
         return new ResponseEntity<>("UNAUTHORIZED", HttpStatus.UNAUTHORIZED);
     }
 
-    // 아이디 중복 확인
     @GetMapping("/checkId")
     @ResponseBody
     public ResponseEntity<Map<String, Boolean>> checkDuplicateId(@RequestParam String id) throws Exception {
@@ -149,7 +123,6 @@ public ResponseEntity<?> handleLogin(@RequestBody Users loginRequest, HttpServle
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    // 이메일 중복 확인
     @GetMapping("/checkMail")
     @ResponseBody
     public ResponseEntity<Map<String, Boolean>> checkDuplicateEmail(@RequestParam String mail) throws Exception {
@@ -159,42 +132,24 @@ public ResponseEntity<?> handleLogin(@RequestBody Users loginRequest, HttpServle
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    /**
-     * 회원가입
-     * @param user
-     * @return
-     * @throws Exception
-     */
     @PostMapping("/join")
     public ResponseEntity<?> join(@RequestBody Users user) throws Exception {
-        log.info("[POST] - /users/join");
-
-        // 이미 존재하는 아이디 및 이메일 확인
         if (userService.checkId(user.getId())) {
-            log.info("이미 존재하는 아이디: {}", user.getId());
-            return new ResponseEntity<>("이미 존재하는 아이디입니다.", HttpStatus.CONFLICT); // 409 Conflict
+            return new ResponseEntity<>("이미 존재하는 아이디입니다.", HttpStatus.CONFLICT);
         }
 
         if (userService.checkMail(user.getMail())) {
-            log.info("이미 존재하는 이메일: {}", user.getMail());
-            return new ResponseEntity<>("이미 존재하는 이메일입니다.", HttpStatus.CONFLICT); // 409 Conflict
+            return new ResponseEntity<>("이미 존재하는 이메일입니다.", HttpStatus.CONFLICT);
         }
 
-        // 회원가입 처리
         int result = userService.join(user);
         if (result > 0) {
-            log.info("회원가입 성공! - SUCCESS");
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         } else {
-            log.info("회원가입 실패! - FAIL");
             return new ResponseEntity<>("회원가입 실패", HttpStatus.BAD_REQUEST);
         }
     }
 
-
-
-
-    // 회원가입 완료 페이지 또는 후처리
     @GetMapping("/joinDone")
     public ResponseEntity<?> joinDone() {
         Map<String, String> response = new HashMap<>();
@@ -202,7 +157,6 @@ public ResponseEntity<?> handleLogin(@RequestBody Users loginRequest, HttpServle
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    // ID 찾기
     @GetMapping("/findId")
     public ResponseEntity<?> findId(@RequestParam String name, @RequestParam String mail, @RequestParam String phone) {
         try {
@@ -214,6 +168,78 @@ public ResponseEntity<?> handleLogin(@RequestBody Users loginRequest, HttpServle
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
-    
-    
+
+    // 이메일 인증번호 발송
+    @PostMapping("/sendAuthCode")
+    @ResponseBody
+    public ResponseEntity<?> sendAuthCode(@RequestBody Map<String, String> userInfo) {
+        String name = userInfo.get("name");
+        String id = userInfo.get("id");
+        String mail = userInfo.get("mail");
+
+        try {
+            log.info("이름: {}, 아이디: {}, 이메일: {}", name, id, mail);
+            // 이름, 아이디, 이메일이 일치하는지 확인
+            boolean isValid = userService.verifyUserInfo(name, id, mail);
+            log.info("사용자 정보 일치 여부: {}", isValid);
+
+            if (isValid) {
+                // 인증번호 생성
+                String authCode = generateAuthCode();
+                log.info("생성된 인증번호: {}", authCode);
+
+                // 이메일 발송
+                emailService.sendSimpleMessage(mail, "인증 코드", "인증 코드: " + authCode);
+
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "인증 코드가 이메일로 전송되었습니다.");
+                response.put("authCode", authCode);  // 실제 서비스에서는 보안상 클라이언트로 인증 코드를 보내지 않음
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("사용자 정보가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            log.error("인증 코드 발송 중 오류: ", e);
+            return new ResponseEntity<>("인증 코드 발송 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<?> resetPw(@RequestBody Users users) {
+        String id = users.getId();
+        String pw = users.getPw();
+        String pwCheck = users.getPwCheck();
+
+        if (!pw.equals(pwCheck)) {
+            return new ResponseEntity<>("CHECKAGAIN", HttpStatus.OK);
+        }
+
+        try {
+            Users user = userService.selectById(id);
+            if (user != null) {
+                BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+                user.setPw(passwordEncoder.encode(pw)); // 비밀번호 암호화 후 저장
+                userService.updatePw(user); // 비밀번호 업데이트
+                return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("비밀번호 재설정 중 오류가 발생했습니다.");
+        }
+    }
+
+    @GetMapping("/resetPwComplete")
+    public ResponseEntity<Map<String, String>> resetPwComplete() {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "비밀번호 재설정이 완료되었습니다.");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    private String generateAuthCode() {
+        Random random = new Random();
+        int authCode = 100000 + random.nextInt(900000);
+        return String.valueOf(authCode);
+    }
 }
