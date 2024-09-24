@@ -21,3 +21,13 @@ export const checkId = (id) => {
 export const checkMail = (mail) => {
     return api.get(`/users/checkMail?mail=${mail}`);
 };
+
+// 인증번호 발송 (이름, 아이디, 이메일 기반)
+export const sendAuthCode = (name, id, mail) => {
+    return api.post(`/users/sendAuthCode`, { name, id, mail });
+};
+
+// 비밀번호 재설정
+export const resetPw = (data) => {
+    return api.post(`/users/resetPassword`, data); // data에는 id, pw, pwCheck 포함
+};

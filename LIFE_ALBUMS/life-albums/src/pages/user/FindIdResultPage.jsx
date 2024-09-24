@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Button from '../../components/user/Button';
 import TextDisplay from '../../components/user/TextDisplay'; // 텍스트를 보여주는 컴포넌트
 
-const FindIdResultForm = () => {
+const FindIdResultPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -40,4 +40,4 @@ const FindIdResultForm = () => {
   );
 };
 
-export default FindIdResultForm;
+export default FindIdResultPage;

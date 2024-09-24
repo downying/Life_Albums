@@ -63,7 +63,7 @@ public class SecurityConfig {
 
         // 권한 및 인가 설정
         http.authorizeRequests()
-        .antMatchers("/", "/login", "/users/login", "/users/findId", "/users/join", "/users/checkId", "/users/checkMail", "/fileApi/**", "/findIdResult").permitAll()  // 회원가입, 로그인 및 중복 확인 경로 허용
+        .antMatchers("/", "/login", "/users/login", "/users/findId", "/users/join", "/users/checkId", "/users/checkMail", "/fileApi/**", "/findIdResult","/users/findPassword", "/users/resetPassword", "/users/sendAuthCode").permitAll()  // 회원가입, 로그인 및 중복 확인 경로 허용
         .antMatchers("/albums/**").authenticated()  // 인증된 사용자만 /api/albums/** 경로에 접근 허용
         .anyRequest().authenticated();  // 그 외의 모든 요청은 인증 필요
 
