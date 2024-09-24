@@ -53,37 +53,41 @@ const LoginForm = () => {
   return (
     <div>
       <div className="w-full max-w-xs mx-auto sm:max-w-sm md:max-w-md lg:max-w-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center">LOGIN</h2>
-      <form onSubmit={handleLogin}>
-        <div className="mb-4">
-          <Input 
-            type="text" 
-            placeholder="ID" 
-            value={id} 
-            onChange={(e) => setId(e.target.value)} 
-          />
-        </div>
-        <div className="mb-4">
-          <Input 
-            type="password" 
-            placeholder="PASSWORD" 
-            value={pw} 
-            onChange={(e) => setPw(e.target.value)} 
-          />
-        </div>
-        <div className="mb-4 flex justify-center items-center"> 
-          <Checkbox 
-            label="아이디 저장" 
-            className="text-sm" 
-            checked={rememberId}  // 체크박스 상태 전달
-            onChange={handleCheckboxChange}  // 체크박스 상태 변경 처리
-          /> 
-        </div>
-        {error && <div className="text-red-500 text-sm mb-4 text-center">{error}</div>}
-        <div className="mb-4">
-          <Button text="로그인" className="w-full"/>
-        </div>
-      </form>
+        <h2 className="text-2xl font-bold mb-6 text-center">LOGIN</h2>
+        <form onSubmit={handleLogin}>
+          <div className="mb-4">
+            <Input 
+              type="text" 
+              placeholder="ID" 
+              value={id} 
+              onChange={(e) => setId(e.target.value)} 
+            />
+          </div>
+          <div className="mb-4">
+            <Input 
+              type="password" 
+              placeholder="PASSWORD" 
+              value={pw} 
+              onChange={(e) => setPw(e.target.value)} 
+            />
+          </div>
+          <div className="mb-4 flex justify-center items-center"> 
+            <Checkbox 
+              label="아이디 저장" 
+              className="text-sm" 
+              checked={rememberId}  // 체크박스 상태 전달
+              onChange={handleCheckboxChange}  // 체크박스 상태 변경 처리
+            /> 
+          </div>
+          {error && (
+            <div className="text-red-500 text-xs mb-4 text-center">
+              아이디 또는 비밀번호가 잘못 되었습니다.
+            </div>
+          )}
+          <div className="mb-4">
+            <Button text="로그인" className="w-full"/>
+          </div>
+        </form>
       <div className="text-center text-[0.8125rem] text-gray-600"> 
         <Link to="/findId" className="mr-1">아이디 찾기</Link> | 
         <Link to="/findPassword" className="ml-1 mr-1">비밀번호 찾기</Link> | 
