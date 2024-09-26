@@ -3,12 +3,14 @@ import api from "../axios";
 // 파일 업로드 (사진 등록)
 export const fileInsert = async (formData, token, username) => {
   try {
+    // formData에 username을 추가
+    formData.append('username', username);
+
     const response = await api.post('/fileApi/upload', formData, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'multipart/form-data',
       },
-      params: { username }
     });
     return response.data;
   } catch (error) {
@@ -16,8 +18,6 @@ export const fileInsert = async (formData, token, username) => {
     throw error;
   }
 };
-
-
 
 export const thumbnails = async (albumsNo, token, page = 1, size = 2) => {
     try {
