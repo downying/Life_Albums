@@ -29,34 +29,46 @@ public class FileUploadController {
     @Autowired
     private ObjectMapper objectMapper;
 
-
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadFile(
             @RequestPart("file") MultipartFile file,
-            @RequestPart("data") String data) {
-
+            @RequestPart("data") String data,
+            @RequestParam("username") String username) {
 
         try {
-            FileDTO uploadDTO = objectMapper.readValue(data, FileDTO.class);
-            log.info("Received data????: " + uploadDTO);
-            FileDTO savedFile = fileService.saveFile(file, uploadDTO);
+            // 로그 추가
+            log.info("Received file: " + file.getOriginalFilename());
+            log.info("Received data: " + data);
+            log.info("Received username: " + username);
+
+            // data를 FileDTO로 변환
+            FileDTO fileDto = objectMapper.readValue(data, FileDTO.class);
+
+            // albumsNo가 null일 경우 예외 처리
+            if (fileDto.getAlbumsNo() <= 0) {
+                return ResponseEntity.badRequest().body("앨범 번호(albumsNo)는 필수입니다.");
+            }
+
+            // 파일 저장 처리
+            FileDTO savedFile = fileService.saveFile(file, fileDto, username);
             return ResponseEntity.ok(savedFile);
         } catch (IOException e) {
+            log.error("파일 업로드 중 오류 발생: ", e);
             return ResponseEntity.internalServerError().body("파일 업로드 중 오류 발생: " + e.getMessage());
         } catch (Exception e) {
+            log.error("잘못된 요청: ", e);  // 예외 로그를 추가하여 이유를 확인
             return ResponseEntity.badRequest().body("잘못된 요청: " + e.getMessage());
         }
     }
 
-    @GetMapping("/thumbnails/{albumsNo}")
+    @GetMapping("/thumbnails/{albumNo}")
     public ResponseEntity<Map<String, Object>> getThumbnailsByAlbumNo(
-            @PathVariable int albumsNo,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "2") int size) {
+        @PathVariable("albumNo") int albumNo,  // albumNo가 경로에 반드시 포함되어야 함
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "2") int size) {
 
-        List<FileDTO> thumbnails = fileService.getThumbnailsByAlbumNo(albumsNo, page, size);
-        int totalCount = fileService.getTotalThumbnailCountByAlbumNo(albumsNo);
-        // 페이지를 size로 나눔 size = 한 화면에 뜨는 앨범
+        List<FileDTO> thumbnails = fileService.getThumbnailsByAlbumNo(albumNo, page, size);
+        int totalCount = fileService.getTotalThumbnailCountByAlbumNo(albumNo);
         int totalPages = (int) Math.ceil((double) totalCount / size);
 
         Map<String, Object> response = new HashMap<>();

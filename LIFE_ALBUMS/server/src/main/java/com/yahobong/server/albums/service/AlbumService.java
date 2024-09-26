@@ -25,10 +25,13 @@ public class AlbumService {
 
     // 앨범 제목 업데이트
     public AlbumDTO updateAlbumTitle(int albumsNo, AlbumDTO albumDTO) {
+        // 앨범 제목 업데이트
         albumMapper.updateAlbumTitle(albumsNo, albumDTO.getTitle());
-        return albumDTO;
-    }
 
+        // 업데이트된 앨범 정보를 다시 조회하여 반환
+        AlbumDTO updatedAlbum = albumMapper.findAlbumById(albumsNo);
+        return updatedAlbum;
+    }
     // 앨범 삭제
     public void deleteAlbum(int albumsNo) {
         albumMapper.deleteAlbum(albumsNo);

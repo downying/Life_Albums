@@ -21,6 +21,9 @@ public interface FileMapper {
     // f.userNo = a.userNo COUNT(*)
     int getTotalThumbnailCountByAlbumNo(int albumsNo);
 
+    // 전체 앨버의 모든 파일 조회
+    List<FileDTO> getAllThumbnails(int userNo);
+
     // 모달로 파일 조회
     FileDTO getFileByFileNo(int fileNo);
 

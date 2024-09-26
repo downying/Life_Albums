@@ -10,7 +10,7 @@ public class FileDTO {
     private int year;
     private int month;
     private int day;
-    private int star;
+    private boolean star;
     private String filePath;
     private String regDate;
 

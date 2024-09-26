@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.yahobong.server.albums.dto.AlbumDTO;
 import com.yahobong.server.albums.service.AlbumService;
+import com.yahobong.server.users.dto.FileDTO;
+import com.yahobong.server.users.service.FileService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,6 +22,20 @@ public class AlbumController {
 
     @Autowired
     private AlbumService albumService;
+
+    @Autowired
+    private FileService fileService;
+
+    // 특정 유저의 전체 앨범 조회
+    @GetMapping("/all/{userNo}")
+    public ResponseEntity<List<FileDTO>> getAllThumbnails(@PathVariable("userNo") int userNo) {
+        try {
+            List<FileDTO> allFiles = fileService.getAllThumbnails(userNo);
+            return ResponseEntity.ok(allFiles);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
     // 특정 유저의 앨범 조회
     @GetMapping("/users/{userNo}")  
@@ -49,14 +65,15 @@ public class AlbumController {
     @PutMapping("/update/{albumsNo}")
     public ResponseEntity<AlbumDTO> updateAlbumTitle(@PathVariable("albumsNo") int albumsNo, @RequestBody AlbumDTO albumDto) {
         try {
+            // 앨범 제목을 업데이트하고, 업데이트된 앨범 정보 반환
             AlbumDTO updatedAlbum = albumService.updateAlbumTitle(albumsNo, albumDto);
             return ResponseEntity.ok(updatedAlbum);
         } catch (Exception e) {
-            log.error("앨범 제목 업데이트 중 오류 발생: ", e);
+            log.error("앨범 제목 업데이트 중 오류 발생:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
+    
     // 앨범 삭제
     @DeleteMapping("/delete/{albumsNo}")
     public ResponseEntity<Void> deleteAlbum(@PathVariable("albumsNo") int albumsNo) {

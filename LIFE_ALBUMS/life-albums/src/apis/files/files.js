@@ -1,19 +1,23 @@
 import api from "../axios";
 
-export const fileInsert = async (File, token) => {
+// 파일 업로드 (사진 등록)
+export const fileInsert = async (formData, token, username) => {
   try {
-    const response = await api.post(`/fileApi/upload`, File, {
-      headers: { 
+    const response = await api.post('/fileApi/upload', formData, {
+      headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
+      params: { username }
     });
     return response.data;
   } catch (error) {
-    console.error('파일 업로드 에러:', error);
+    console.error('사진 등록 중 오류 발생:', error);
     throw error;
   }
 };
+
+
 
 export const thumbnails = async (albumsNo, token, page = 1, size = 2) => {
     try {
