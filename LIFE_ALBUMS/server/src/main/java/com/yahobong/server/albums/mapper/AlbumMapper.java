@@ -10,6 +10,9 @@ import java.util.List;
 public interface AlbumMapper {
     // 사용자별 앨범 조회
     public List<AlbumDTO> findAlbumsByUserNo(int userNo);
+
+    // 앨범 번호로 조회
+    public AlbumDTO findAlbumById(int albumsNo);
    
     // 앨범 삽입
     public void insertAlbum(AlbumDTO albumDTO);

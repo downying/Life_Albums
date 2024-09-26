@@ -1,15 +1,21 @@
 import api from '../axios';
 
-// 앨범 생성
-export const addAlbum = (data, token) => api.post(`/albums/create`, data, {
+// 전체 앨범의 파일 조회
+export const getAllAlbums = (userNo, token) => api.get(`/albums/all/${userNo}`, {
   headers: {
     Authorization: `Bearer ${token}`,
   },
 });
 
-
 // 특정 유저의 앨범 조회
 export const getAlbumsByUserNo = (userNo, token) => api.get(`/albums/users/${userNo}`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
+// 앨범 생성
+export const addAlbum = (data, token) => api.post(`/albums/create`, data, {
   headers: {
     Authorization: `Bearer ${token}`,
   },

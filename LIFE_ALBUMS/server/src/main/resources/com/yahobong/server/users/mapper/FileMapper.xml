@@ -39,6 +39,14 @@
         WHERE a.albumsNo = #{albumsNo}
     </select>
 
+     <!-- 모든 앨범의 썸네일 조회 (전체 앨범 조회 기능) -->
+    <select id="getAllThumbnails" resultType="FileDTO">
+        SELECT u.userNo, u.name, u.mail, a.albumsNo, a.title
+        FROM users u
+        JOIN albums a ON u.userNo = a.userNo
+        WHERE u.userNo = #{userNo}  <!-- 특정 사용자의 모든 파일 조회 -->
+    </select>
+
     <!-- fileNo로 단일 파일 정보 가져오기 -->
     <select id="getFileByFileNo" resultType="FileDTO">
         SELECT 

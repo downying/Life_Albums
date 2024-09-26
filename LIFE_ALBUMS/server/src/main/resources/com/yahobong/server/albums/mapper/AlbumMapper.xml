@@ -12,6 +12,13 @@
         WHERE userNo = #{userNo}
     </select>
 
+    <!-- 앨범 번호로 조회 -->
+    <select id="findAlbumById" resultType="AlbumDTO">
+        SELECT albumsNo, userNo, title
+        FROM albums
+        WHERE albumsNo = #{albumsNo}
+    </select>
+
     <!-- 앨범 추가 -->
     <insert id="insertAlbum" useGeneratedKeys="true" keyProperty="albumsNo">
         INSERT INTO albums (title, userNo)

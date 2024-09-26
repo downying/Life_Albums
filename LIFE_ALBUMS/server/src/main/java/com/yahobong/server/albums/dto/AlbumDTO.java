@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class AlbumDTO {
-    private int albumsNo;  // 앨범 번호
+    private int albumsNo;  // 앨범 번호 
     private int userNo;    // 사용자 번호
     private String title;  // 앨범 제목
 
@@ -17,6 +17,4 @@ public class AlbumDTO {
         this.userNo = userNo;
         this.title = title;
     }
-
-
 }

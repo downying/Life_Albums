@@ -29,22 +29,21 @@ public class FileService {
     }
 
     @Transactional
-    public FileDTO saveFile(MultipartFile file, FileDTO fileDto) throws IOException {
-        // 파일 저장 경로 설정 (필요시 다중 경로 처리 가능)
-        String[] paths = uploadPath.split(",");
-        Path root = Paths.get(paths[0]); // 첫 번째 경로 사용
-
-        // 파일 이름 생성
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+    public FileDTO saveFile(MultipartFile file, FileDTO fileDto, String username) throws IOException {
+        Path root = Paths.get(uploadPath);
         
-        // 파일 저장
+        // 경로가 존재하지 않으면 디렉토리 생성
+        if (!Files.exists(root)) {
+            Files.createDirectories(root);
+        }
+
+        // 파일 이름 생성 및 경로 설정
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
         Path filePath = root.resolve(fileName);
-        Files.copy(file.getInputStream(), root.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-         // filePath 설정
-        fileDto.setFilePath(filePath.toString());
-
-        // 파일 정보를 데이터베이스에 저장
+        // 파일 경로 설정 후 데이터베이스에 저장
+        fileDto.setFilePath("/upload/" + fileName);
         fileMapper.insertFile(fileDto);
 
         return fileDto;
@@ -59,6 +58,12 @@ public class FileService {
     @Transactional
     public int getTotalThumbnailCountByAlbumNo(int albumsNo) {
         return fileMapper.getTotalThumbnailCountByAlbumNo(albumsNo);
+    }
+
+    // 전체 앨범의 모든 파일 조회
+    @Transactional
+    public List<FileDTO> getAllThumbnails(int userNo) {
+        return fileMapper.getAllThumbnails(userNo);
     }
 
     // 모달로 파일 조회

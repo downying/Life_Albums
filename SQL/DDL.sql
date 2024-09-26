@@ -31,7 +31,7 @@ CREATE TABLE `files` (
     `year`      INT            NULL,
     `month`     INT            NULL,
     `day`       INT            NULL,
-    `star`      INT            NULL,
+    `star`      BOOLEAN            NULL,
     `regDate`   TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `filePath`  VARCHAR(255)   NOT NULL,
     PRIMARY KEY (`fileNo`),
