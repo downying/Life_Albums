@@ -33,7 +33,7 @@ public class FileUploadController {
     public ResponseEntity<?> uploadFile(
             @RequestPart("file") MultipartFile file,
             @RequestPart("data") String data,
-            @RequestParam("username") String username) {
+            @RequestPart("username") String username) {
 
         try {
             // 로그 추가
