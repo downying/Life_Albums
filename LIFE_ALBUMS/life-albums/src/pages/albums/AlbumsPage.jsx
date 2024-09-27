@@ -157,49 +157,50 @@ const AlbumsPage = () => {
         <Sidebar onSelectAlbum={handleSelectAlbum} />
 
         <div className="flex-grow flex flex-col items-center justify-center bg-gray-100 p-4">
-          <div className="relative flex items-center">
+          <div className="relative flex items-center justify-center w-[80%] h-[95%]">
             <NavigationButton
               direction="left"
               onClick={() => console.log('Left Clicked')}
-              className="absolute left-[-60px] top-[50%] transform -translate-y-1/2 text-7xl text-black z-10 bg-white p-4 rounded-full shadow-lg"
+              className="absolute left-[-40px] md:left-[-60px] top-[50%] transform -translate-y-1/2 text-5xl md:text-7xl text-black z-10 bg-white p-2 md:p-4 rounded-full shadow-lg"
             />
-
-            <div className="relative w-[900px] h-[600px]">
+            {/* 반응형 추가 */}
+            <div className="relative w-full w-[80%] h-[85%]">
               {/* 앨범의 옆면 표현 */}
-              <div className="absolute left-[-10px] top-0 w-[30px] h-full bg-gray-300 rounded-l-[10px] z-0"></div>
+              <div className="absolute left-[-5px] md:left-[-10px] top-0 w-[15px] md:w-[30px] h-full bg-gray-300 rounded-l-[5px] md:rounded-l-[10px] z-0"></div>
               {/* 앨범의 밑면 표현 */}
-              <div className="absolute bottom-[-10px] left-0 w-full h-[30px] bg-gray-300 rounded-b-[10px] z-0"></div>
+              <div className="absolute bottom-[-5px] md:bottom-[-10px] left-0 w-full h-[15px] md:h-[30px] bg-gray-300 rounded-b-[5px] md:rounded-b-[10px] z-0"></div>
 
-              <div className="relative w-full h-full bg-white border-4 border-black rounded-[20px] shadow-2xl flex overflow-hidden z-10">
+              <div className="relative w-full h-full bg-white border-2 md:border-4 border-black rounded-[10px] md:rounded-[20px] shadow-lg md:shadow-2xl flex overflow-hidden z-10">
                 {currentPhotos.length > 0 ? (
                   currentPhotos.map((photo, index) => (
-                    <div key={index} className="relative w-1/2 h-full bg-white flex flex-col justify-center items-center p-6">
+                    <div key={index} className="relative w-full sm:w-1/2 h-full bg-white flex flex-col justify-center items-center p-4 md:p-6">
                       <img
                         src={photo.filePath}
                         alt={`Photo ${index + 1}`}
-                        className="w-[300px] h-[400px] object-cover rounded-lg shadow-md cursor-pointer"
+                        className="w-[200px] md:w-[300px] h-[300px] md:h-[400px] object-cover rounded-lg shadow-md cursor-pointer"
                         onClick={() => handleImageClick(photo)}
                       />
                       <div className="flex items-center mt-4">
                         <FontAwesomeIcon icon={faHeart} className="text-red-500 mr-2" />
-                        <span className="text-sm">
+                        <span className="text-xs md:text-sm">
                           {`${photo.year}-${String(photo.month).padStart(2, '0')}-${String(photo.day).padStart(2, '0')}`}
                         </span>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="relative w-1/2 h-full bg-white flex justify-center items-center p-6">
+                  <div className="relative w-full sm:w-1/2 h-full bg-white flex justify-center items-center p-4 md:p-6">
                     <p>사진이 없습니다.</p>
                   </div>
                 )}
                 {addPhotoButtonPosition !== 'none' && (
-                  <div className={`relative w-1/2 h-full bg-white flex justify-center items-center p-6 ${addPhotoButtonPosition === 'left' ? 'order-1' : 'order-2'}`}>
+                  <div className={`relative w-full sm:w-1/2 h-full bg-white flex justify-center items-center p-4 md:p-6 ${addPhotoButtonPosition === 'left' ? 'order-1' : 'order-2'}`}>
                     <AddPhotoButton onClick={handleNoImageClick} />
                   </div>
                 )}
-              </div>
+              
             </div>
+          </div>
 
             <NavigationButton
               direction="right"

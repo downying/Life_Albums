@@ -53,9 +53,9 @@ const CalendarPage = () => {
     <div className="flex flex-col bg-gray-100"> {/* Match background */}
       <div className="h-[calc(100vh-116px)] flex">
         <Sidebar /> 
-        <div className="flex-grow flex mt-4 mb-4"> {/* Add margin between header and footer */}
-          <main className="flex-grow flex items-center justify-center">
-            <div className="w-full h-full max-w-5xl bg-white shadow-lg rounded-lg overflow-hidden flex flex-col"> {/* Adjusted height and width */}
+        <div className="flex-grow flex mt-4 mb-4 items-center justify-center"> {/* Add margin between header and footer */}
+          <main className="flex-grow flex items-center justify-center w-full h-full">
+            <div className="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col w-[70%] h-[95%]"> {/* w-[70%] h-[95%] 반응형 추가 */}
               <div className="bg-gray-200 text-gray-800 py-2 px-4 flex items-center justify-between">
                 <button onClick={prevMonth} className="text-gray-600 hover:text-gray-800">
                   <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
