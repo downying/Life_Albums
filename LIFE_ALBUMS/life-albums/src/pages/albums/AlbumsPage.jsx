@@ -18,6 +18,7 @@ const AlbumsPage = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [dataStartDate, setDataStartDate] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [starClick, setStarClick] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAlbumNo, setCurrentAlbumNo] = useState(null); // 선택된 앨범 번호 상태
@@ -52,16 +53,43 @@ const AlbumsPage = () => {
     }
   };
 
-  const celendarFetchThumbnails = async (albumNo, dataStartDate) => { // 함수 위치를 수정
-    console.log(dataStartDate);
-    
+  // 즐겨찾기 클릭 시 썸네일을 불러오는 함수
+  const starFetchThumbnails = async (albumNo) => { // 함수 위치를 수정
     setLoading(true);
     try {
-      const url = `/fileApi/thumbnails/${albumNo}`; // albumNo에 맞는 썸네일 API 호출
+      const url = `/fileApi/starThumbnails/${albumNo}`; // albumNo에 맞는 썸네일 API 호출
       const response = await fetch(url);
+      console.log(response);
+      
       const data = await response.json();
       console.log("썸네일 API 응답 데이터:", data);
       setCurrentAlbum(data.thumbnails || []); // 응답 데이터를 currentAlbum에 저장
+    } catch (err) {
+      setError(err.message);
+      console.error("썸네일 불러오기 오류:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const celendarFetchThumbnails = async (albumNo, dateArray) => {
+    console.log(dateArray); // [2024, 9, 28]
+    
+    setLoading(true);
+    try {
+      const [year, month, day] = dateArray; // 배열 구조 분해
+      const baseUrl = `/fileApi/dateThumbnails/${albumNo}`;
+      const params = new URLSearchParams({
+        year: year,
+        month: month,
+        day: day
+      });
+      const url = `${baseUrl}?${params}`;
+  
+      const response = await fetch(url);
+      const data = await response.json();
+      console.log("썸네일 API 응답 데이터:", data);
+      setCurrentAlbum(data.thumbnails || []);
     } catch (err) {
       setError(err.message);
       console.error("썸네일 불러오기 오류:", err);
@@ -80,19 +108,25 @@ const AlbumsPage = () => {
   // 페이지가 처음 로드될 때 localStorage에서 저장된 앨범 번호 가져오기
   useEffect(() => {
     const storedAlbumNo = localStorage.getItem("selectedAlbumNo");
-  
+    
     if (storedAlbumNo) {
       setCurrentAlbumNo(storedAlbumNo);
       
+      let fetchFunction = fetchThumbnails;
+      let additionalParam = null;
+  
       if (showDatePicker) {
-        
-        celendarFetchThumbnails(storedAlbumNo, dataStartDate);
+        fetchFunction = celendarFetchThumbnails;
+        additionalParam = dataStartDate;
+      } else if (starClick) {
+        fetchFunction = starFetchThumbnails;
       } else {
-        fetchThumbnails(storedAlbumNo);
         setStartDate(null);
       }
+  
+      fetchFunction(storedAlbumNo, additionalParam);
     }
-  }, [showDatePicker, startDate, ]);
+  }, [showDatePicker, starClick, dataStartDate, ]);
 
 
   // 전체 앨범 선택 시 모든 앨범의 썸네일을 불러오는 로직
@@ -110,6 +144,11 @@ const AlbumsPage = () => {
   const handleCalendarIconClick = (e) => {
     e.stopPropagation();
     setShowDatePicker((prevShowDatePicker) => !prevShowDatePicker);
+  };
+
+  const handleStarIconClick = (e) => {
+    e.stopPropagation();
+    setStarClick((prevStarClick) => !prevStarClick);
   };
 
   // 총 페이지 수 계산 (추가된 사진 수를 고려)
@@ -242,10 +281,10 @@ const AlbumsPage = () => {
               <FontAwesomeIcon icon={faCalendarAlt} className="text-black text-xl" onClick={handleCalendarIconClick} />
               <span className="text-black">+ 사진 추가하기</span>
             </button>
-            <Link to="/favorites" className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 cursor-pointer" onClick={handleStarIconClick}>
               <FontAwesomeIcon icon={faHeart} className="text-red-500 text-xl" />
               <span className="text-black">즐겨찾기 모아보기</span>
-            </Link>
+            </div>
 
             {showDatePicker && (
               <div className="relative">
