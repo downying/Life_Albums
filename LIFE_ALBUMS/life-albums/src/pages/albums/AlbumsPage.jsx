@@ -97,38 +97,30 @@ const AlbumsPage = () => {
     }
   };
 
-  // currentAlbumNo가 업데이트되면 API 호출
   useEffect(() => {
-    if (!currentAlbumNo) return;
-    if (!userInfo) return;
-
-    fetchThumbnails(currentAlbumNo); // 앨범 번호가 업데이트되면 썸네일을 가져옴
-  }, [currentAlbumNo, userInfo]); // currentAlbumNo가 변경될 때마다 호출
+    if (currentAlbumNo) {
+      if (starClick) {
+        starFetchThumbnails(currentAlbumNo);
+      } else if (userInfo && userInfo.token) {
+        fetchThumbnails(currentAlbumNo);
+      }
+    }
+  }, [currentAlbumNo, starClick, userInfo]);
+  
 
   // 페이지가 처음 로드될 때 localStorage에서 저장된 앨범 번호 가져오기
   useEffect(() => {
     const storedAlbumNo = localStorage.getItem("selectedAlbumNo");
-    
     if (storedAlbumNo) {
       setCurrentAlbumNo(storedAlbumNo);
-      
-      let fetchFunction = fetchThumbnails;
-      let additionalParam = null;
-  
-      if (showDatePicker) {
-        fetchFunction = celendarFetchThumbnails;
-        additionalParam = dataStartDate;
-      } else if (starClick) {
-        fetchFunction = starFetchThumbnails;
-      } else {
-        setStartDate(null);
+      if (userInfo && userInfo.token) {
+        if (showDatePicker) {
+          celendarFetchThumbnails(storedAlbumNo, dataStartDate);
+        }
       }
-  
-      fetchFunction(storedAlbumNo, additionalParam);
     }
-  }, [showDatePicker, starClick, dataStartDate, ]);
-
-
+  }, [userInfo, showDatePicker, dataStartDate]);
+  
   // 전체 앨범 선택 시 모든 앨범의 썸네일을 불러오는 로직
   useEffect(() => {
     if (currentAlbumNo === 'ALL') {
@@ -321,7 +313,9 @@ const AlbumsPage = () => {
                   selected={startDate}
                   onChange={(date) => {
                     setStartDate(date);
-                    setDataStartDate([date.getFullYear(), date.getMonth() + 1, date.getDate()]);
+                    const dateArray = [date.getFullYear(), date.getMonth() + 1, date.getDate()];
+                    setDataStartDate(dateArray);
+                    celendarFetchThumbnails(currentAlbumNo, dateArray);
                   }}
                   inline
                 />

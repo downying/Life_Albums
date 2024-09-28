@@ -7,6 +7,7 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
   const [album, setAlbum] = useState({ imgSrc: '', date: new Date().toISOString().split('T')[0], memo: '', file: null });
   const [previousDate, setPreviousDate] = useState(''); // 이전 날짜 저장
   const [previousMemo, setPreviousMemo] = useState(''); // 이전 메모 저장
+  const [updateSuccess, setUpdateSuccess] = useState(false); // 수정 성공 상태
 
   useEffect(() => {
     if (isOpen && fileNo && !check) {
@@ -14,13 +15,12 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
         .then((data) => {
           console.log("불러온 파일 데이터:", data);
           
-          // year, month, day 값을 yyyy-MM-dd 형식으로 조합
           const formattedDate = (data.year && data.month && data.day)
             ? `${data.year}-${String(data.month).padStart(2, '0')}-${String(data.day).padStart(2, '0')}`
-            : new Date().toISOString().split('T')[0]; // 값이 없으면 현재 날짜로 설정
+            : new Date().toISOString().split('T')[0];
           
-          setPreviousDate(formattedDate); // 이전 날짜 저장
-          setPreviousMemo(data.content);  // 이전 메모 저장
+          setPreviousDate(formattedDate);
+          setPreviousMemo(data.content);
   
           setAlbum({
             imgSrc: data.filePath,
@@ -30,7 +30,7 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
         })
         .catch((error) => console.error("파일 불러오기 오류:", error));
     } else if (check) {
-      setAlbum({ imgSrc: '', date: new Date().toISOString().split('T')[0], memo: '', file: null }); // 새로 등록 시 현재 날짜로 기본값 설정
+      setAlbum({ imgSrc: '', date: new Date().toISOString().split('T')[0], memo: '', file: null });
     }
   }, [fileNo, isOpen, token, check]);
   
@@ -54,6 +54,7 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
         
         // onUpdate 호출
         onUpdate(updatedFile); // 추가
+        setUpdateSuccess(true); // 수정 성공 상태 업데이트
         onClose();
       } catch (error) {
         console.error("파일 업데이트 중 오류 발생:", error);
@@ -62,10 +63,16 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
     }
   };
   
-  
+  // 수정 성공 시 새로고침
+  useEffect(() => {
+    if (updateSuccess) {
+      window.location.reload(); // 새로고침
+    }
+  }, [updateSuccess]);
+
   // 파일 삭제 핸들러
   const handleDelete = async () => {
-    if (window.confirm("정말로 삭제하시겠습니까?")) {  // 삭제 확인
+    if (window.confirm("정말로 삭제하시겠습니까?")) {
       try {
         await deleteFile(fileNo, token);
         onDelete();
@@ -87,8 +94,7 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
-      {/* 반응형 추가 */}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white w-[53%] h-[55%] p-6 rounded-lg shadow-lg relative flex">
         <button
           className="absolute top-2 right-2 text-gray-600"
@@ -133,8 +139,8 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
             <label className="text-gray-700">메모</label>
             <textarea
               placeholder="메모를 입력하세요"
-              value={album.memo || ''} // 메모 값이 제대로 반영되도록 확인
-              onChange={(e) => setAlbum({ ...album, memo: e.target.value })} // 변경된 메모를 상태에 반영
+              value={album.memo || ''}
+              onChange={(e) => setAlbum({ ...album, memo: e.target.value })}
               className="border p-2 rounded w-full h-[200px] resize-none"
             />
           </div>
