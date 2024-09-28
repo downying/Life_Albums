@@ -6,43 +6,42 @@ import AddPhotoButton from '../../components/albums/AddPhotoButton';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Link } from 'react-router-dom';
-import Pagination from '../../components/albums/Pagenation';
 import Sidebar from '../../components/albums/Sidebar';
+import Pagination from '../../components/albums/Pagenation';
 import Modal from '../../components/albums/Modal';
-import { fileInsert } from '../../apis/files/files';
+import { fileInsert, updateFile, thumbnails, deleteFile } from '../../apis/files/files';
 import { getAllAlbums } from '../../apis/albums/album';
 import { LoginContext } from '../../components/LoginProvider';
 
 const AlbumsPage = () => {
-  const { userInfo } = useContext(LoginContext);
+  const { userInfo } = useContext(LoginContext); // 로그인 정보를 가져옴
+  const [fileNo, setFileNo] = useState(null);
   const [startDate, setStartDate] = useState(new Date());
   const [dataStartDate, setDataStartDate] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [starClick, setStarClick] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentAlbumNo, setCurrentAlbumNo] = useState(null); // 선택된 앨범 번호 상태
+  const [currentAlbumNo, setCurrentAlbumNo] = useState(null); // 선택된 앨범 번호
   const [currentAlbum, setCurrentAlbum] = useState([]); // 현재 앨범의 썸네일 리스트
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [check, setCheck] = useState(false); // check 상태 추가
-  const albumsPerPage = 2; // 한 페이지에 두 개의 사진을 표시
+  const albumsPerPage = 2; // 한 페이지에 표시할 사진 수
 
   // Sidebar에서 선택된 앨범 번호를 받아와 상태를 업데이트하고 localStorage에 저장
   const handleSelectAlbum = (albumNo) => {
-    console.log("AlbumsPage에서 전달받은 앨범 번호:", albumNo); // 로그 추가
-    setCurrentAlbumNo(albumNo); // 앨범 번호 상태 업데이트
-    localStorage.setItem("selectedAlbumNo", albumNo); // 앨범 번호를 localStorage에 저장
-    fetchThumbnails(albumNo); // 선택된 앨범의 썸네일을 불러오기
+    console.log("AlbumsPage에서 전달받은 앨범 번호:", albumNo);
+    setCurrentAlbumNo(albumNo);
+    localStorage.setItem("selectedAlbumNo", albumNo); // 앨범 번호 저장
+    fetchThumbnails(albumNo); // 선택된 앨범의 썸네일 불러오기
   };
 
   // 앨범 선택 시 썸네일을 불러오는 함수
-  const fetchThumbnails = async (albumNo) => { // 함수 위치를 수정
+  const fetchThumbnails = async (albumNo) => {
     setLoading(true);
     try {
-      const url = `/fileApi/thumbnails/${albumNo}`; // albumNo에 맞는 썸네일 API 호출
-      const response = await fetch(url);
-      const data = await response.json();
+      const data = await thumbnails(albumNo, userInfo.token);
       console.log("썸네일 API 응답 데이터:", data);
       setCurrentAlbum(data.thumbnails || []); // 응답 데이터를 currentAlbum에 저장
     } catch (err) {
@@ -101,9 +100,10 @@ const AlbumsPage = () => {
   // currentAlbumNo가 업데이트되면 API 호출
   useEffect(() => {
     if (!currentAlbumNo) return;
+    if (!userInfo) return;
 
     fetchThumbnails(currentAlbumNo); // 앨범 번호가 업데이트되면 썸네일을 가져옴
-  }, [currentAlbumNo]); // currentAlbumNo가 변경될 때마다 호출
+  }, [currentAlbumNo, userInfo]); // currentAlbumNo가 변경될 때마다 호출
 
   // 페이지가 처음 로드될 때 localStorage에서 저장된 앨범 번호 가져오기
   useEffect(() => {
@@ -160,12 +160,41 @@ const AlbumsPage = () => {
     }
   };
 
-  // 모달을 열고 닫는 로직
-  const handleImageClick = () => {
-    setIsModalOpen(true);
-    setCheck(false); // 이미지 클릭 시 check 값 변경
+  // 이미지 클릭 시 파일 번호를 설정하고 모달을 염
+  const handleImageClick = (photo) => {
+    console.log("선택된 파일 번호:", photo.fileNo); // fileNo 로그 확인
+    setFileNo(photo.fileNo); // 선택된 파일 번호를 상태로 설정
+    setIsModalOpen(true);  // 모달을 열기
+    setCheck(false); // 이미 있는 파일일 경우 check를 false로 설정
   };
 
+  // 파일 삭제 함수
+  const handleDeleteFile = async () => {
+    try {
+      await deleteFile(fileNo, userInfo.token);
+      console.log("파일이 삭제되었습니다.");
+      // 파일 삭제 후 필요한 후속 작업
+      await fetchThumbnails(currentAlbumNo);
+    } catch (error) {
+      console.error("파일 삭제 중 오류:", error);
+    }
+  };
+
+  // 파일 업데이트 함수
+  const handleUpdateFile = async (updatedFile) => {
+    try {
+      await updateFile(fileNo, updatedFile, userInfo.token);
+      console.log("파일이 업데이트되었습니다.");
+      
+      setCurrentAlbum((prev) => prev.map(photo => 
+        photo.fileNo === fileNo ? { ...photo, date: updatedFile.date } : photo
+      ));
+    } catch (error) {
+      console.error("파일 업데이트 중 오류:", error);
+    }
+  };
+  
+  
   const handleNoImageClick = () => {
     setIsModalOpen(true);
     setCheck(true); // 이미지가 없을 때 check 값 변경
@@ -178,33 +207,33 @@ const AlbumsPage = () => {
   // 사진을 등록하는 함수
   const handleRegisterAlbum = async (newAlbum) => {
     if (!currentAlbumNo) {
-      alert("앨범을 선택해 주세요.");
-      return;
+        alert("앨범을 선택해 주세요.");
+        return;
     }
 
     try {
-      const formData = new FormData();
-      formData.append('file', newAlbum.file);
-      formData.append('data', JSON.stringify({
-        albumsNo: currentAlbumNo,
-        content: newAlbum.memo,
-        year: new Date(newAlbum.date).getFullYear(),
-        month: new Date(newAlbum.date).getMonth() + 1,
-        day: new Date(newAlbum.date).getDate(),
-        star: false,
-      }));
+        const formData = new FormData();
+        formData.append('file', newAlbum.file);
+        formData.append('data', JSON.stringify({
+            albumsNo: currentAlbumNo,
+            content: newAlbum.memo,
+            year: new Date(newAlbum.date).getFullYear(),
+            month: new Date(newAlbum.date).getMonth() + 1,
+            day: new Date(newAlbum.date).getDate(),
+            star: false,
+        }));
+        
+        // 파일 등록 API 호출
+        const result = await fileInsert(formData, userInfo.token, userInfo.id);
+        console.log('사진 등록 성공:', result);
 
-      const result = await fileInsert(formData, userInfo.token, userInfo.id);
-      console.log('사진 등록 성공:', result);
-
-      // 사진 등록 후 썸네일 다시 불러오기 전에 로딩 상태로 변경
-      setLoading(true);
-      await fetchThumbnails(currentAlbumNo); // 썸네일 다시 불러오기
-      setLoading(false);
+        // 썸네일을 다시 불러옵니다
+        await fetchThumbnails(currentAlbumNo); // 변경된 사항
     } catch (error) {
-      console.error('사진 등록 실패:', error);
+        console.error('사진 등록 실패:', error);
     }
   };
+
 
   // 현재 페이지의 사진을 계산
   const currentPhotos = currentAlbum.slice(
@@ -308,11 +337,14 @@ const AlbumsPage = () => {
 
       {isModalOpen && (
         <Modal
-          album={currentAlbum}
+          fileNo={fileNo} 
           isOpen={isModalOpen}
-          onClose={handleCloseModal}
+          onClose={() => setIsModalOpen(false)}
+          onDelete={handleDeleteFile}
+          onUpdate={handleUpdateFile}
+          token={userInfo.token}
           onRegister={handleRegisterAlbum}
-          check={check}  // check 상태 전달
+          check={check}
         />
       )}
     </div>

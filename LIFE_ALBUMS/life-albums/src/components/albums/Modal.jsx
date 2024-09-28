@@ -4,62 +4,86 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { deleteFile, getFile, updateFile } from '../../apis/files/files';
 
 const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister, check }) => {
-  const [album, setAlbum] = useState({ imgSrc: '', date: '', memo: '', file: null });
+  const [album, setAlbum] = useState({ imgSrc: '', date: new Date().toISOString().split('T')[0], memo: '', file: null });
+  const [previousDate, setPreviousDate] = useState(''); // 이전 날짜 저장
+  const [previousMemo, setPreviousMemo] = useState(''); // 이전 메모 저장
 
   useEffect(() => {
     if (isOpen && fileNo && !check) {
       getFile(fileNo, token)
         .then((data) => {
+          console.log("불러온 파일 데이터:", data);
+          
+          // year, month, day 값을 yyyy-MM-dd 형식으로 조합
+          const formattedDate = (data.year && data.month && data.day)
+            ? `${data.year}-${String(data.month).padStart(2, '0')}-${String(data.day).padStart(2, '0')}`
+            : new Date().toISOString().split('T')[0]; // 값이 없으면 현재 날짜로 설정
+          
+          setPreviousDate(formattedDate); // 이전 날짜 저장
+          setPreviousMemo(data.content);  // 이전 메모 저장
+  
           setAlbum({
             imgSrc: data.filePath,
-            date: `${data.year}-${data.month}-${data.day}`,
+            date: formattedDate,
             memo: data.content,
-            file: null
           });
         })
         .catch((error) => console.error("파일 불러오기 오류:", error));
     } else if (check) {
-      setAlbum({ imgSrc: '', date: '', memo: '', file: null });
+      setAlbum({ imgSrc: '', date: new Date().toISOString().split('T')[0], memo: '', file: null }); // 새로 등록 시 현재 날짜로 기본값 설정
     }
   }, [fileNo, isOpen, token, check]);
-
+  
+  // 파일 업데이트 핸들러
   const handleUpdate = async () => {
-    try {
-      if (!check) {
-        await updateFile(fileNo, {
-          date: album.date,
-          content: album.memo,
-          filePath: album.imgSrc,
-        }, token);
-        onUpdate(album);
-      } else {
-        onRegister(album);
+    if (check) {
+      await onRegister(album);
+      onClose();
+    } else {
+      try {
+        const updatedFile = {
+          fileNo,
+          year: album.date.split('-')[0],
+          month: album.date.split('-')[1],
+          day: album.date.split('-')[2],
+          memo: album.memo,
+        };
+        
+        await updateFile(fileNo, updatedFile, token);
+        alert("파일이 수정되었습니다.");
+        
+        // onUpdate 호출
+        onUpdate(updatedFile); // 추가
+        onClose();
+      } catch (error) {
+        console.error("파일 업데이트 중 오류 발생:", error);
+        alert("파일 업데이트에 실패했습니다.");
       }
-    } catch (error) {
-      console.error("파일 수정/등록 중 오류:", error);
     }
-    onClose();
   };
-
+  
+  
+  // 파일 삭제 핸들러
   const handleDelete = async () => {
-    try {
-      await deleteFile(fileNo, token);
-      onDelete();
-    } catch (error) {
-      console.error("파일 삭제 중 오류:", error);
+    if (window.confirm("정말로 삭제하시겠습니까?")) {  // 삭제 확인
+      try {
+        await deleteFile(fileNo, token);
+        onDelete();
+      } catch (error) {
+        console.error("파일 삭제 중 오류:", error);
+      }
+      onClose();
     }
-    onClose();
   };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
-    setAlbum(prev => ({
-      ...prev,
+    setAlbum((prevAlbum) => ({
+      ...prevAlbum,
       file: selectedFile,
-      imgSrc: URL.createObjectURL(selectedFile)
     }));
   };
-
+  
   if (!isOpen) return null;
 
   return (
@@ -109,8 +133,8 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
             <label className="text-gray-700">메모</label>
             <textarea
               placeholder="메모를 입력하세요"
-              value={album.memo || ''}
-              onChange={(e) => setAlbum({ ...album, memo: e.target.value })}
+              value={album.memo || ''} // 메모 값이 제대로 반영되도록 확인
+              onChange={(e) => setAlbum({ ...album, memo: e.target.value })} // 변경된 메모를 상태에 반영
               className="border p-2 rounded w-full h-[200px] resize-none"
             />
           </div>
