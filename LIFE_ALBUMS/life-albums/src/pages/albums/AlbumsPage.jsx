@@ -16,6 +16,7 @@ import { LoginContext } from '../../components/LoginProvider';
 const AlbumsPage = () => {
   const { userInfo } = useContext(LoginContext);
   const [startDate, setStartDate] = useState(new Date());
+  const [dataStartDate, setDataStartDate] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,6 +52,24 @@ const AlbumsPage = () => {
     }
   };
 
+  const celendarFetchThumbnails = async (albumNo, dataStartDate) => { // 함수 위치를 수정
+    console.log(dataStartDate);
+    
+    setLoading(true);
+    try {
+      const url = `/fileApi/thumbnails/${albumNo}`; // albumNo에 맞는 썸네일 API 호출
+      const response = await fetch(url);
+      const data = await response.json();
+      console.log("썸네일 API 응답 데이터:", data);
+      setCurrentAlbum(data.thumbnails || []); // 응답 데이터를 currentAlbum에 저장
+    } catch (err) {
+      setError(err.message);
+      console.error("썸네일 불러오기 오류:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // currentAlbumNo가 업데이트되면 API 호출
   useEffect(() => {
     if (!currentAlbumNo) return;
@@ -61,11 +80,20 @@ const AlbumsPage = () => {
   // 페이지가 처음 로드될 때 localStorage에서 저장된 앨범 번호 가져오기
   useEffect(() => {
     const storedAlbumNo = localStorage.getItem("selectedAlbumNo");
+  
     if (storedAlbumNo) {
-      setCurrentAlbumNo(storedAlbumNo); // 저장된 앨범 번호로 상태 설정
-      fetchThumbnails(storedAlbumNo);   // 해당 앨범의 썸네일 불러오기
+      setCurrentAlbumNo(storedAlbumNo);
+      
+      if (showDatePicker) {
+        
+        celendarFetchThumbnails(storedAlbumNo, dataStartDate);
+      } else {
+        fetchThumbnails(storedAlbumNo);
+        setStartDate(null);
+      }
     }
-  }, []);
+  }, [showDatePicker, startDate, ]);
+
 
   // 전체 앨범 선택 시 모든 앨범의 썸네일을 불러오는 로직
   useEffect(() => {
@@ -198,9 +226,9 @@ const AlbumsPage = () => {
                     <AddPhotoButton onClick={handleNoImageClick} />
                   </div>
                 )}
-              
+
+              </div>
             </div>
-          </div>
 
             <NavigationButton
               direction="right"
@@ -221,7 +249,14 @@ const AlbumsPage = () => {
 
             {showDatePicker && (
               <div className="relative">
-                <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} inline />
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => {
+                    setStartDate(date);
+                    setDataStartDate([date.getFullYear(), date.getMonth() + 1, date.getDate()]);
+                  }}
+                  inline
+                />
               </div>
             )}
           </div>
