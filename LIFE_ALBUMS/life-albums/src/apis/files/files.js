@@ -58,17 +58,35 @@ export const getFile = async (fileNo, token) => {
 // 파일 수정
 export const updateFile = async (fileNo, fileData, token) => {
   try {
-      const response = await api.put(`/fileApi/${fileNo}`, fileData, {
-          headers: {
-              Authorization: `Bearer ${token}`,
-          },
-      });
-      return response.data;
+    // 데이터가 정의되어 있는지 체크
+    if (!fileData) {
+      throw new Error("fileData가 정의되어 있지 않습니다.");
+    }
+
+    const updatedFileData = {
+      year: fileData.year || new Date().getFullYear(),
+      month: fileData.month || new Date().getMonth() + 1,
+      day: fileData.day || new Date().getDate(),
+      content: fileData.memo || '', // content 필드로 메모를 보냄
+    };
+
+    console.log('수정할 데이터:', updatedFileData); // 전송할 데이터 로그
+
+    const response = await api.put(`/fileApi/${fileNo}`, updatedFileData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return response.data;
   } catch (error) {
-      console.error('파일 수정 중 오류:', error);
-      throw error;
+    console.error('파일 수정 중 오류:', error.response?.data || error.message);
+    throw error;
   }
 };
+
+
 
 // 파일 삭제
 export const deleteFile = async (fileNo, token) => {
