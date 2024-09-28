@@ -56,6 +56,18 @@ public class FileService {
     }
 
     @Transactional
+    public List<FileDTO> getDateThumbnailsByAlbumNo(int albumsNo, int page, int size, int year, int month, int day) {
+        int offset = (page - 1) * size;
+        return fileMapper.getDateThumbnailsByAlbumNo(albumsNo, offset, size, year, month, day);
+    }
+
+    @Transactional
+    public List<FileDTO> getStarThumbnailsByAlbumNo(int albumsNo, int page, int size) {
+        int offset = (page - 1) * size;
+        return fileMapper.getStarThumbnailsByAlbumNo(albumsNo, offset, size);
+    }
+
+    @Transactional
     public int getTotalThumbnailCountByAlbumNo(int albumsNo) {
         return fileMapper.getTotalThumbnailCountByAlbumNo(albumsNo);
     }

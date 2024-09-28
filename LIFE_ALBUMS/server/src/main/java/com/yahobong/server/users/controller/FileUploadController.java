@@ -56,16 +56,16 @@ public class FileUploadController {
             log.error("파일 업로드 중 오류 발생: ", e);
             return ResponseEntity.internalServerError().body("파일 업로드 중 오류 발생: " + e.getMessage());
         } catch (Exception e) {
-            log.error("잘못된 요청: ", e);  // 예외 로그를 추가하여 이유를 확인
+            log.error("잘못된 요청: ", e); // 예외 로그를 추가하여 이유를 확인
             return ResponseEntity.badRequest().body("잘못된 요청: " + e.getMessage());
         }
     }
 
     @GetMapping("/thumbnails/{albumNo}")
     public ResponseEntity<Map<String, Object>> getThumbnailsByAlbumNo(
-        @PathVariable("albumNo") int albumNo,  // albumNo가 경로에 반드시 포함되어야 함
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "2") int size) {
+            @PathVariable("albumNo") int albumNo, // albumNo가 경로에 반드시 포함되어야 함
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "2") int size) {
 
         List<FileDTO> thumbnails = fileService.getThumbnailsByAlbumNo(albumNo, page, size);
         int totalCount = fileService.getTotalThumbnailCountByAlbumNo(albumNo);
@@ -77,6 +77,52 @@ public class FileUploadController {
         response.put("totalItems", totalCount);
         response.put("totalPages", totalPages);
 
+        return ResponseEntity.ok(response);
+    }
+
+    // 캘린더 아이콘 data로 thumbnail
+    @GetMapping("/dateThumbnails/{albumNo}")
+    public ResponseEntity<?> getDataThumbnails(
+            @PathVariable int albumNo,
+            @RequestParam int year,
+            @RequestParam int month,
+            @RequestParam int day,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "2") int size) {
+
+        log.info("Year: {}, Month: {}, Day: {}", year, month, day);
+
+        List<FileDTO> thumbnails = fileService.getDateThumbnailsByAlbumNo(albumNo, page, size, year, month, day);
+        int totalCount = fileService.getTotalThumbnailCountByAlbumNo(albumNo);
+        int totalPages = (int) Math.ceil((double) totalCount / size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("thumbnails", thumbnails);
+        response.put("currentPage", page);
+        response.put("totalItems", totalCount);
+        response.put("totalPages", totalPages);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    // 캘린더 아이콘 data로 star 1 인 thumnail
+    @GetMapping("/starThumbnails/{albumNo}")
+    public ResponseEntity<?> getStarThumbnails(
+            @PathVariable int albumNo,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "2") int size) {
+
+
+        List<FileDTO> thumbnails = fileService.getStarThumbnailsByAlbumNo(albumNo, page, size);
+        int totalCount = fileService.getTotalThumbnailCountByAlbumNo(albumNo);
+        int totalPages = (int) Math.ceil((double) totalCount / size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("thumbnails", thumbnails);
+        response.put("currentPage", page);
+        response.put("totalItems", totalCount);
+        response.put("totalPages", totalPages);
+        
         return ResponseEntity.ok(response);
     }
 
