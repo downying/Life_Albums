@@ -87,8 +87,9 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white w-[800px] h-[500px] p-6 rounded-lg shadow-lg relative flex">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
+      {/* 반응형 추가 */}
+      <div className="bg-white w-[53%] h-[55%] p-6 rounded-lg shadow-lg relative flex">
         <button
           className="absolute top-2 right-2 text-gray-600"
           onClick={onClose}
@@ -96,7 +97,7 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
           <FontAwesomeIcon icon={faTimes} />
         </button>
 
-        <div className="w-1/2 flex flex-col items-center justify-center">
+        <div className="w-[50%] flex flex-col items-center justify-center">
           {album.imgSrc ? (
             <img
               src={album.imgSrc}

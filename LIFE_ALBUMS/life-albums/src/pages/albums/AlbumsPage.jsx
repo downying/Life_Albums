@@ -17,7 +17,9 @@ const AlbumsPage = () => {
   const { userInfo } = useContext(LoginContext); // 로그인 정보를 가져옴
   const [fileNo, setFileNo] = useState(null);
   const [startDate, setStartDate] = useState(new Date());
+  const [dataStartDate, setDataStartDate] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [starClick, setStarClick] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAlbumNo, setCurrentAlbumNo] = useState(null); // 선택된 앨범 번호
@@ -50,6 +52,51 @@ const AlbumsPage = () => {
     }
   };
 
+  // 즐겨찾기 클릭 시 썸네일을 불러오는 함수
+  const starFetchThumbnails = async (albumNo) => { // 함수 위치를 수정
+    setLoading(true);
+    try {
+      const url = `/fileApi/starThumbnails/${albumNo}`; // albumNo에 맞는 썸네일 API 호출
+      const response = await fetch(url);
+      console.log(response);
+      
+      const data = await response.json();
+      console.log("썸네일 API 응답 데이터:", data);
+      setCurrentAlbum(data.thumbnails || []); // 응답 데이터를 currentAlbum에 저장
+    } catch (err) {
+      setError(err.message);
+      console.error("썸네일 불러오기 오류:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const celendarFetchThumbnails = async (albumNo, dateArray) => {
+    console.log(dateArray); // [2024, 9, 28]
+    
+    setLoading(true);
+    try {
+      const [year, month, day] = dateArray; // 배열 구조 분해
+      const baseUrl = `/fileApi/dateThumbnails/${albumNo}`;
+      const params = new URLSearchParams({
+        year: year,
+        month: month,
+        day: day
+      });
+      const url = `${baseUrl}?${params}`;
+  
+      const response = await fetch(url);
+      const data = await response.json();
+      console.log("썸네일 API 응답 데이터:", data);
+      setCurrentAlbum(data.thumbnails || []);
+    } catch (err) {
+      setError(err.message);
+      console.error("썸네일 불러오기 오류:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // currentAlbumNo가 업데이트되면 API 호출
   useEffect(() => {
     if (!currentAlbumNo) return;
@@ -61,12 +108,26 @@ const AlbumsPage = () => {
   // 페이지가 처음 로드될 때 localStorage에서 저장된 앨범 번호 가져오기
   useEffect(() => {
     const storedAlbumNo = localStorage.getItem("selectedAlbumNo");
-    if (storedAlbumNo && userInfo && userInfo.token) {
+    
+    if (storedAlbumNo) {
       setCurrentAlbumNo(storedAlbumNo);
-      fetchThumbnails(storedAlbumNo);
-    }
-  }, [userInfo]);
+      
+      let fetchFunction = fetchThumbnails;
+      let additionalParam = null;
   
+      if (showDatePicker) {
+        fetchFunction = celendarFetchThumbnails;
+        additionalParam = dataStartDate;
+      } else if (starClick) {
+        fetchFunction = starFetchThumbnails;
+      } else {
+        setStartDate(null);
+      }
+  
+      fetchFunction(storedAlbumNo, additionalParam);
+    }
+  }, [showDatePicker, starClick, dataStartDate, ]);
+
 
   // 전체 앨범 선택 시 모든 앨범의 썸네일을 불러오는 로직
   useEffect(() => {
@@ -85,7 +146,12 @@ const AlbumsPage = () => {
     setShowDatePicker((prevShowDatePicker) => !prevShowDatePicker);
   };
 
-  // 총 페이지 수 계산
+  const handleStarIconClick = (e) => {
+    e.stopPropagation();
+    setStarClick((prevStarClick) => !prevStarClick);
+  };
+
+  // 총 페이지 수 계산 (추가된 사진 수를 고려)
   const totalPages = Math.ceil(currentAlbum.length / albumsPerPage);
 
   const onPageChange = (pageNumber) => {
@@ -187,47 +253,48 @@ const AlbumsPage = () => {
         <Sidebar onSelectAlbum={handleSelectAlbum} />
 
         <div className="flex-grow flex flex-col items-center justify-center bg-gray-100 p-4">
-          <div className="relative flex items-center">
+          <div className="relative flex items-center justify-center w-[80%] h-[95%]">
             <NavigationButton
               direction="left"
               onClick={() => console.log('Left Clicked')}
-              className="absolute left-[-60px] top-[50%] transform -translate-y-1/2 text-7xl text-black z-10 bg-white p-4 rounded-full shadow-lg"
+              className="absolute left-[-40px] md:left-[-60px] top-[50%] transform -translate-y-1/2 text-5xl md:text-7xl text-black z-10 bg-white p-2 md:p-4 rounded-full shadow-lg"
             />
-
-            <div className="relative w-[900px] h-[600px]">
+            {/* 반응형 추가 */}
+            <div className="relative w-full w-[80%] h-[85%]">
               {/* 앨범의 옆면 표현 */}
-              <div className="absolute left-[-10px] top-0 w-[30px] h-full bg-gray-300 rounded-l-[10px] z-0"></div>
+              <div className="absolute left-[-5px] md:left-[-10px] top-0 w-[15px] md:w-[30px] h-full bg-gray-300 rounded-l-[5px] md:rounded-l-[10px] z-0"></div>
               {/* 앨범의 밑면 표현 */}
-              <div className="absolute bottom-[-10px] left-0 w-full h-[30px] bg-gray-300 rounded-b-[10px] z-0"></div>
+              <div className="absolute bottom-[-5px] md:bottom-[-10px] left-0 w-full h-[15px] md:h-[30px] bg-gray-300 rounded-b-[5px] md:rounded-b-[10px] z-0"></div>
 
-              <div className="relative w-full h-full bg-white border-4 border-black rounded-[20px] shadow-2xl flex overflow-hidden z-10">
+              <div className="relative w-full h-full bg-white border-2 md:border-4 border-black rounded-[10px] md:rounded-[20px] shadow-lg md:shadow-2xl flex overflow-hidden z-10">
                 {currentPhotos.length > 0 ? (
                   currentPhotos.map((photo, index) => (
-                    <div key={index} className="relative w-1/2 h-full bg-white flex flex-col justify-center items-center p-6">
+                    <div key={index} className="relative w-full sm:w-1/2 h-full bg-white flex flex-col justify-center items-center p-4 md:p-6">
                       <img
                         src={photo.filePath}
                         alt={`Photo ${index + 1}`}
-                        className="w-[300px] h-[400px] object-cover rounded-lg shadow-md cursor-pointer"
+                        className="w-[200px] md:w-[300px] h-[300px] md:h-[400px] object-cover rounded-lg shadow-md cursor-pointer"
                         onClick={() => handleImageClick(photo)}
                       />
                       <div className="flex items-center mt-4">
                         <FontAwesomeIcon icon={faHeart} className="text-red-500 mr-2" />
-                        <span className="text-sm">
+                        <span className="text-xs md:text-sm">
                           {`${photo.year}-${String(photo.month).padStart(2, '0')}-${String(photo.day).padStart(2, '0')}`}
                         </span>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="relative w-1/2 h-full bg-white flex justify-center items-center p-6">
+                  <div className="relative w-full sm:w-1/2 h-full bg-white flex justify-center items-center p-4 md:p-6">
                     <p>사진이 없습니다.</p>
                   </div>
                 )}
                 {addPhotoButtonPosition !== 'none' && (
-                  <div className={`relative w-1/2 h-full bg-white flex justify-center items-center p-6 ${addPhotoButtonPosition === 'left' ? 'order-1' : 'order-2'}`}>
+                  <div className={`relative w-full sm:w-1/2 h-full bg-white flex justify-center items-center p-4 md:p-6 ${addPhotoButtonPosition === 'left' ? 'order-1' : 'order-2'}`}>
                     <AddPhotoButton onClick={handleNoImageClick} />
                   </div>
                 )}
+
               </div>
             </div>
 
@@ -243,14 +310,21 @@ const AlbumsPage = () => {
               <FontAwesomeIcon icon={faCalendarAlt} className="text-black text-xl" onClick={handleCalendarIconClick} />
               <span className="text-black">+ 사진 추가하기</span>
             </button>
-            <Link to="/favorites" className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 cursor-pointer" onClick={handleStarIconClick}>
               <FontAwesomeIcon icon={faHeart} className="text-red-500 text-xl" />
               <span className="text-black">즐겨찾기 모아보기</span>
-            </Link>
+            </div>
 
             {showDatePicker && (
               <div className="relative">
-                <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} inline />
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => {
+                    setStartDate(date);
+                    setDataStartDate([date.getFullYear(), date.getMonth() + 1, date.getDate()]);
+                  }}
+                  inline
+                />
               </div>
             )}
           </div>

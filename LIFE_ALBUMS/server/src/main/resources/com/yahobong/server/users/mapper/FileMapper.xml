@@ -31,6 +31,54 @@
         LIMIT 
             #{offset}, #{limit}
     </select>
+
+    <select id="getDateThumbnailsByAlbumNo" resultType="com.yahobong.server.users.dto.FileDTO">
+        SELECT 
+            f.fileNo, 
+            f.albumsNo, 
+            f.content, 
+            f.year, 
+            f.month, 
+            f.day, 
+            f.star, 
+            f.filePath
+        FROM 
+            files f
+        INNER JOIN 
+            albums a ON f.albumsNo = a.albumsNo
+        WHERE 
+            a.albumsNo = #{albumsNo}
+            AND f.year = #{year}
+            AND f.month = #{month}
+            AND f.day = #{day}
+        ORDER BY 
+            f.fileNo ASC
+        LIMIT 
+            #{offset}, #{limit}
+    </select>
+    
+    <select id="getStarThumbnailsByAlbumNo" resultType="com.yahobong.server.users.dto.FileDTO">
+        SELECT 
+            f.fileNo, 
+            f.albumsNo, 
+            f.content, 
+            f.year, 
+            f.month, 
+            f.day, 
+            f.star, 
+            f.filePath
+        FROM 
+            files f
+        INNER JOIN 
+            albums a ON f.albumsNo = a.albumsNo
+        WHERE 
+            a.albumsNo = #{albumsNo}
+            AND f.star = 1
+        ORDER BY 
+            f.year ASC, f.month ASC, f.day ASC, f.fileNo ASC
+        LIMIT 
+            #{offset}, #{limit}
+    </select>
     
     <select id="getTotalThumbnailCountByAlbumNo" resultType="int">
         SELECT COUNT(*)
