@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -60,10 +61,21 @@ public class FileService {
     }
 
     @Transactional
-    public List<FileDTO> getDateThumbnailsByAlbumNo(int albumsNo, int page, int size, int year, int month, int day) {
-        int offset = (page - 1) * size;
-        return fileMapper.getDateThumbnailsByAlbumNo(albumsNo, offset, size, year, month, day);
+    public List<FileDTO> getDateThumbnailsByDate(int year, int month, int day) {
+        // 해당 날짜의 사진을 가져옴
+        List<FileDTO> photos = fileMapper.getDateThumbnailsByDate(year, month, day);
+        
+        // star가 있는 사진을 우선적으로 정렬
+        return photos.stream()
+            .sorted((a, b) -> {
+                if (a.isStar() == b.isStar()) {
+                    return Long.compare(a.getFileNo(), b.getFileNo());
+                }
+                return Boolean.compare(b.isStar(), a.isStar());
+            })
+            .collect(Collectors.toList());
     }
+
 
     @Transactional
     public List<FileDTO> getStarThumbnailsByAlbumNo(int albumsNo, int page, int size) {

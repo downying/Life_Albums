@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -44,11 +45,6 @@ public class FileUploadController {
             // data를 FileDTO로 변환
             FileDTO fileDto = objectMapper.readValue(data, FileDTO.class);
 
-            // albumsNo가 null일 경우 예외 처리
-            if (fileDto.getAlbumsNo() <= 0) {
-                return ResponseEntity.badRequest().body("앨범 번호(albumsNo)는 필수입니다.");
-            }
-
             // 파일 저장 처리
             FileDTO savedFile = fileService.saveFile(file, fileDto, username);
             return ResponseEntity.ok(savedFile);
@@ -63,7 +59,7 @@ public class FileUploadController {
 
     @GetMapping("/thumbnails/{albumNo}")
     public ResponseEntity<Map<String, Object>> getThumbnailsByAlbumNo(
-            @PathVariable("albumNo") int albumNo,  // albumNo가 경로에 제대로 포함되는지 확인
+            @PathVariable("albumNo") int albumNo,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "2") int size) {
         
@@ -81,52 +77,37 @@ public class FileUploadController {
         return ResponseEntity.ok(response);
     }
 
-
     // 캘린더 아이콘 data로 thumbnail
-    @GetMapping("/dateThumbnails/{albumNo}")
+    @GetMapping("/dateThumbnails")
     public ResponseEntity<?> getDataThumbnails(
-            @PathVariable int albumNo,
             @RequestParam int year,
             @RequestParam int month,
-            @RequestParam int day,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "2") int size) {
+            @RequestParam int day) { // albumNo 매개변수 제거
 
         log.info("Year: {}, Month: {}, Day: {}", year, month, day);
 
-        List<FileDTO> thumbnails = fileService.getDateThumbnailsByAlbumNo(albumNo, page, size, year, month, day);
-        int totalCount = fileService.getTotalThumbnailCountByAlbumNo(albumNo);
-        int totalPages = (int) Math.ceil((double) totalCount / size);
+        // 해당 날짜의 사진을 가져옴
+        List<FileDTO> thumbnails = fileService.getDateThumbnailsByDate(year, month, day);
+        
+        // 별이 있는 사진과 없는 사진을 분리
+        List<FileDTO> starPhotos = thumbnails.stream()
+                .filter(FileDTO::isStar) // star가 true인 사진 필터링
+                .collect(Collectors.toList());
+
+        List<FileDTO> normalPhotos = thumbnails.stream()
+                .filter(photo -> !photo.isStar()) // star가 false인 사진 필터링
+                .collect(Collectors.toList());
+
+        // 결과 합치기 (star가 있는 사진이 먼저 오도록)
+        starPhotos.addAll(normalPhotos);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("thumbnails", thumbnails);
-        response.put("currentPage", page);
-        response.put("totalItems", totalCount);
-        response.put("totalPages", totalPages);
+        response.put("thumbnails", starPhotos);
         
         return ResponseEntity.ok(response);
     }
 
-    // 캘린더 아이콘 data로 star 1 인 thumnail
-    @GetMapping("/starThumbnails/{albumNo}")
-    public ResponseEntity<?> getStarThumbnails(
-            @PathVariable int albumNo,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "2") int size) {
-
-
-        List<FileDTO> thumbnails = fileService.getStarThumbnailsByAlbumNo(albumNo, page, size);
-        int totalCount = fileService.getTotalThumbnailCountByAlbumNo(albumNo);
-        int totalPages = (int) Math.ceil((double) totalCount / size);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("thumbnails", thumbnails);
-        response.put("currentPage", page);
-        response.put("totalItems", totalCount);
-        response.put("totalPages", totalPages);
-        
-        return ResponseEntity.ok(response);
-    }
+    
 
     // 특정 fileNo로 파일 정보 가져오기
     @GetMapping("/{fileNo}")
@@ -191,5 +172,18 @@ public class FileUploadController {
         }
     }
 
+    // 해당 날짜의 사진을 가져오는 메소드
+    @GetMapping("/photos")
+    public ResponseEntity<List<FileDTO>> getPhotosByDate(
+            @RequestParam int year,
+            @RequestParam int month,
+            @RequestParam int day) {
 
+        log.info("연도: {}, 월: {}, 일: {}", year, month, day);
+        
+        // 해당 날짜의 사진을 star 우선으로 가져오기
+        List<FileDTO> photos = fileService.getDateThumbnailsByDate(year, month, day);
+        
+        return ResponseEntity.ok(photos);
+    }
 }
