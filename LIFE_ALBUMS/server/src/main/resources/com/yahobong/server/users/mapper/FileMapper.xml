@@ -32,7 +32,8 @@
             #{offset}, #{limit}
     </select>
 
-    <select id="getDateThumbnailsByAlbumNo" resultType="com.yahobong.server.users.dto.FileDTO">
+    <!-- 특정 날짜에 대한 사진 조회 -->
+    <select id="getDateThumbnailsByDate" resultType="com.yahobong.server.users.dto.FileDTO">
         SELECT 
             f.fileNo, 
             f.albumsNo, 
@@ -44,18 +45,14 @@
             f.filePath
         FROM 
             files f
-        INNER JOIN 
-            albums a ON f.albumsNo = a.albumsNo
         WHERE 
-            a.albumsNo = #{albumsNo}
-            AND f.year = #{year}
+            f.year = #{year}
             AND f.month = #{month}
             AND f.day = #{day}
         ORDER BY 
             f.fileNo ASC
-        LIMIT 
-            #{offset}, #{limit}
     </select>
+
     
     <select id="getStarThumbnailsByAlbumNo" resultType="com.yahobong.server.users.dto.FileDTO">
         SELECT 
@@ -120,14 +117,13 @@
 
     <!-- fileNo로 단일 파일 정보 가져오기 -->
     <select id="getFileByFileNo" resultType="FileDTO">
-    SELECT 
-        fileNo, albumsNo, content, year, month, day, star, filePath
-    FROM 
-        files
-    WHERE 
-        fileNo = #{fileNo}
+        SELECT 
+            fileNo, albumsNo, content, year, month, day, star, filePath
+        FROM 
+            files
+        WHERE 
+            fileNo = #{fileNo}
     </select>
-
 
     <!-- 파일 수정 -->
     <update id="updateFile" parameterType="FileDTO">
@@ -141,7 +137,6 @@
             fileNo = #{fileNo}
     </update>
 
-
     <!-- 파일 삭제 -->
     <delete id="deleteFile" parameterType="int">
         DELETE FROM files
@@ -154,6 +149,5 @@
         SET star = NOT star
         WHERE fileNo = #{fileNo}
     </update>
-
 
 </mapper>

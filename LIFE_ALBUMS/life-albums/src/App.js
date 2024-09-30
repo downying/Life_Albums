@@ -38,52 +38,57 @@ const AppRoutes = () => {
 
         // 회원가입, 로그인, 아이디 찾기 페이지는 예외로 처리
         const publicRoutes = ['/join', '/login', '/findId', '/calendar', '/findIdResult', '/findPassword', '/resetPassword'];
-    
+        
+        // 앨범 관련 경로를 처리할 수 있도록 수정
+        const albumRegex = /^\/albums\/\d+$/;  // 앨범 번호가 있는 경우 처리
+        const userAlbumRegex = /^\/albums\/users\/\d+$/;  // 사용자 앨범 경로 처리
+
         if (!publicRoutes.includes(currentLocation.pathname)) {
             if (isLoggedIn && userInfo) {
-              const userPath = `/albums/users/${userInfo.userNo}`;
-              if (currentLocation.pathname !== userPath) {
-                  navigate(userPath);
-              }
+                const userPath = `/albums/users/${userInfo.userNo}`;
+                // 현재 경로가 특정 앨범 경로일 경우에는 리다이렉트하지 않음
+                if (!currentLocation.pathname.match(albumRegex) && !currentLocation.pathname.match(userAlbumRegex)) {
+                    navigate(userPath);
+                }
             } else {
                 navigate('/login');
             }
         }
     }, [isLoggedIn, isCheckingLogin, navigate, currentLocation.pathname, userInfo]);
 
-  
+    return (
+      <Routes>
+        {/* 로그인 페이지 */}
+        <Route path="/login" element={<LoginPage />} />
 
+        {/* 아이디찾기 페이지 */}
+        <Route path="/findId" element={<FindIdPage />} />
 
-  return (
-    <Routes>
-      {/* 로그인 페이지 */}
-      <Route path="/login" element={<LoginPage />} />
+        {/* 아이디찾기 완료 페이지*/}
+        <Route path="/findIdResult" element={<FindIdResultPage />} />
 
-      {/* 아이디찾기 페이지 */}
-      <Route path="/findId" element={<FindIdPage />} />
+        {/* 비밀번호 찾기 페이지 */}
+        <Route path="/findPassword" element={<FindPasswordPage />} />
 
-      {/* 아이디찾기 완료 페이지*/}
-      <Route path="/findIdResult" element={<FindIdResultPage />} />
+        {/* 비밀번호 재설정 페이지 */}
+        <Route path="/resetPassword" element={<ResetPasswordPage />} />
+        
+        {/* 회원가입 */}
+        <Route path="/join" element={<JoinPage />} />
+        
+        {/* 사용자 앨범 */}
+        <Route path="/albums/users/:userNo" element={<AlbumsPage />} />
 
-      {/* 비밀번호 찾기 페이지 */}
-      <Route path="/findPassword" element={<FindPasswordPage />} />
+        {/* 특정 앨범 */}
+        <Route path="/albums/:albumNo" element={<AlbumsPage />} />
 
-      {/* 비밀번호 재설정 페이지 */}
-      <Route path="/resetPassword" element={<ResetPasswordPage />} />
-      
-      {/* 회원가입 */}
-      <Route path="/join" element={<JoinPage />} />
-      
-      {/* 앨범 */}
-      <Route path="/albums/users/:userNo" element={<AlbumsPage />} />
+        {/* 캘린더 */}
+        <Route path="/calendar" element={<CalendarPage />} />
 
-      {/* 캘린더 */}
-      <Route path="/calendar" element={<CalendarPage />} />
-
-      {/* 기본 경로 처리 */}
-      <Route path="/" element={<LoginPage />} />
-    </Routes>
-  );
+        {/* 기본 경로 처리 */}
+        <Route path="/" element={<LoginPage />} />
+      </Routes>
+    );
 };
 
 export default App;

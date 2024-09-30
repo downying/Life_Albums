@@ -6,7 +6,7 @@ import { addAlbum, getAlbumsByUserNo, updateAlbumTitle, deleteAlbum } from '../.
 import { LoginContext } from '../LoginProvider';
 import { allThumbnails, thumbnails } from '../../apis/files/files';
 
-const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbumNo, setCurrentAlbumNo }) => {
+const Sidebar = ({ onSelectAlbum, currentAlbum, currentAlbumNo, setCurrentAlbumNo }) => {
   const { userInfo } = useContext(LoginContext);
   const [albums, setAlbums] = useState([]);
   const [editingAlbum, setEditingAlbum] = useState(null);
@@ -49,44 +49,42 @@ const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbum
     }
   };
 
-  // 전체 앨범 클릭 시 썸네일 조회
   const handleAllAlbumsClick = () => {
     console.log("전체 앨범 클릭됨");
-    console.log("userInfo:", userInfo);  // userInfo 로그 출력
+    console.log("userInfo:", userInfo);
 
-    // userInfo가 제대로 설정되었는지 최종 확인 후 실행
     if (userInfo && userInfo.userNo && userInfo.accessToken) {
-      console.log("fetchAllThumbnails 호출 준비 완료");
-      setIsAllAlbumsActive(true);  // 전체 앨범 활성화 상태 설정
-      setSelectedAlbumNo(null);    // 선택된 앨범 해제
-      fetchAllThumbnails();  // 전체 앨범의 썸네일 조회
-      setCurrentAlbumNo(null);  // 현재 앨범 선택 해제
+        console.log("allThumbnails 호출 준비 완료");
+        setIsAllAlbumsActive(true); // 전체 앨범 활성화 상태 설정
+        setSelectedAlbumNo(null); // 선택된 앨범 해제
+        setCurrentAlbumNo(null); // 현재 앨범 선택 해제
+
+        // 전체 앨범 썸네일을 불러오는 API 호출
+        allThumbnails(userInfo.userNo, userInfo.accessToken)
+            .then((data) => {
+                console.log("전체 앨범의 썸네일 조회 성공:", data);
+                setCurrentThumbnails(data.thumbnails || []);
+            })
+            .catch((error) => {
+                console.error("전체 앨범 썸네일 조회 중 오류:", error);
+            });
     } else {
-      console.log("사용자 정보가 없습니다.");  // userInfo가 없는 경우 로그 출력
+        console.log("사용자 정보가 없습니다."); // userInfo가 없는 경우 로그 출력
     }
-  };
+};
+
 
   // 사이드바에서 앨범을 선택
   const handleAlbumClick = (albumNo) => {
-    console.log('Selected albumNo:', albumNo);  // albumNo가 제대로 찍히는지 확인
+    console.log('선택된 앨범 번호:', albumNo); // 선택된 앨범 번호 로그
     setSelectedAlbumNo(albumNo);
-    onSelectAlbum(albumNo);  // 상위 컴포넌트로 전달
-    fetchThumbnails(albumNo);  // 특정 앨범의 썸네일을 불러옴
-    localStorage.setItem("selectedAlbumNo", albumNo);
-    setIsAllAlbumsActive(false);  // 전체 앨범 비활성화
-  };
+    onSelectAlbum(albumNo); // AlbumsPage의 handleSelectAlbum 호출
+    fetchThumbnails(albumNo); // 해당 앨범의 썸네일 불러오기
+    localStorage.setItem("selectedAlbumNo", albumNo); // 앨범 번호 로컬스토리지에 저장
+    setIsAllAlbumsActive(false); // 전체 앨범 비활성화
+};
 
-  // 전체 앨범의 썸네일 조회
-  useEffect(() => {
-    if (userInfo && userInfo.accessToken) {
-      console.log("fetchAllThumbnails 호출 준비 완료.");
-      fetchAllThumbnails(); // 전체 앨범 썸네일 불러오기
-    } else {
-      console.log("사용자 정보가 없습니다.");  // userInfo가 없는 경우 로그 출력
-    }
-  }, [userInfo]);
-
-  // 앨범 추가 버튼 클릭 시 새로운 앨범 생성
+  // 앨범 추가 함수 (기존 코드 유지)
   const handleAddAlbum = async () => {
     if (userInfo && userInfo.userNo) {
       const newAlbum = {
@@ -109,7 +107,7 @@ const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbum
     setNewTitle(album.title);
   };
 
-  // 앨범 제목 저장
+  // 앨범 제목 저장 함수 (기존 코드 유지)
   const handleSaveClick = async (albumsNo) => {
     const targetAlbumNo = albumsNo || editingAlbum;
     
@@ -127,7 +125,7 @@ const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbum
     }
   };  
 
-  // 앨범 삭제
+  // 앨범 삭제 함수 (기존 코드 유지)
   const handleDeleteClick = async (albumsNo) => {
     const confirmDelete = window.confirm('정말로 삭제하시겠습니까?');
     if (confirmDelete) {
@@ -140,22 +138,48 @@ const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbum
     }
   };
 
+  // 전체 앨범의 썸네일 조회
   useEffect(() => {
-      console.log("현재 앨범 썸네일 상태:", currentThumbnails); // 상태 변화 로그
+    if (userInfo && userInfo.accessToken) {
+      console.log("allThumbnails 호출 준비 완료.");
+      allThumbnails(userInfo.userNo, userInfo.accessToken)
+        .then((data) => {
+          console.log("전체 앨범 썸네일 조회 성공:", data);
+          setCurrentThumbnails(data.thumbnails || []);
+        })
+        .catch((error) => {
+          console.error("전체 앨범 썸네일 조회 중 오류:", error);
+        });
+    } else {
+      console.log("사용자 정보가 없습니다.");  // userInfo가 없는 경우 로그 출력
+    }
+  }, [userInfo]);
+
+  useEffect(() => {
+    console.log("현재 앨범 썸네일 상태:", currentThumbnails); // 상태 변화 로그
   }, [currentThumbnails]);
 
   useEffect(() => {
-      console.log("현재 앨범 번호:", currentAlbumNo);
-      if (userInfo) {
-          if (currentAlbumNo) {
-              fetchThumbnails(currentAlbumNo);
-          } else {
-              fetchAllThumbnails();
-          }
-      } else {
-          console.log("사용자 정보가 없습니다.");
-      }
-  }, [currentAlbumNo, userInfo, isAllAlbumsActive]);
+    console.log("현재 앨범 번호:", currentAlbumNo);
+    if (userInfo) {
+        if (currentAlbumNo) {
+            fetchThumbnails(currentAlbumNo);
+        } else {
+            // currentAlbumNo가 null일 때 전체 앨범 썸네일을 가져옴
+            allThumbnails(userInfo.userNo, userInfo.accessToken)
+                .then((data) => {
+                    console.log("전체 앨범의 썸네일 조회 성공:", data);
+                    setCurrentThumbnails(data.thumbnails || []);
+                })
+                .catch((error) => {
+                    console.error("전체 앨범 썸네일 조회 중 오류:", error);
+                });
+        }
+    } else {
+        console.log("사용자 정보가 없습니다.");
+    }
+}, [currentAlbumNo, userInfo, isAllAlbumsActive]);
+
 
   return (
     <div className="w-64 bg-white text-black p-4 flex flex-col justify-between">
@@ -166,7 +190,6 @@ const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbum
             <span>앨범 추가하기</span>
           </button>
         </div>
-
         <div className="mb-4">
           <button 
             className={`flex items-center space-x-2 w-full text-left rounded p-2 ${isAllAlbumsActive ? 'bg-gray-200' : 'hover:bg-gray-100'}`}

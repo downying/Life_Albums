@@ -12,6 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
         // /upload/** URL로 접근 시 C:/upload 경로의 파일을 제공
         registry.addResourceHandler("/upload/**")
                 .addResourceLocations("file:///C:/upload/")
-                .addResourceLocations("file:/Users/apnalchangchanghongjunbeom/upload/");
+                .addResourceLocations("file:/Users/apnalchangchanghongjunbeom/upload/")
+                .addResourceLocations("file:/Users/yeon/upload/");
     }
 }
