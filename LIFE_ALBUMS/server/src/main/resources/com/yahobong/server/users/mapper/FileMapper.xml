@@ -148,4 +148,12 @@
         WHERE fileNo = #{fileNo}
     </delete>
 
+    <!-- 즐겨찾기 -->
+    <update id="toggleStarByFileNo" parameterType="int">
+        UPDATE files
+        SET star = NOT star
+        WHERE fileNo = #{fileNo}
+    </update>
+
+
 </mapper>

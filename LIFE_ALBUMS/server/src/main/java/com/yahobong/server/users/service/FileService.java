@@ -111,4 +111,10 @@ public class FileService {
     public void deleteFile(int fileNo) {
         fileMapper.deleteFile(fileNo);
     }
+
+    // 즐겨찾기 상태 토글
+    @Transactional
+    public void toggleStar(int fileNo) {
+        fileMapper.toggleStarByFileNo(fileNo);
+    }
 }

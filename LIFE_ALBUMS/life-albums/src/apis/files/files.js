@@ -124,4 +124,20 @@ export const allThumbnails = async (userNo, token, page = 1, size = 2) => {
   }
 };
 
+// 즐겨찾기 상태 토글 (스타 토글)
+export const toggleStar = async (fileNo, token) => {
+  try {
+    const response = await api.put(`/fileApi/toggleStar/${fileNo}`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Response from toggleStar API:", response.data);  // 응답 로그 확인
+    return response.data;
+  } catch (error) {
+    console.error('즐겨찾기 상태 변경 중 오류 발생:', error);
+    throw error;
+  }
+};
+
 
