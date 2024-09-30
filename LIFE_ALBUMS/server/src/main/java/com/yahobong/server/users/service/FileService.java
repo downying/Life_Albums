@@ -8,6 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.yahobong.server.users.dto.FileDTO;
 import com.yahobong.server.users.mapper.FileMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +17,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
+@Slf4j
 @Service
 public class FileService {
 
@@ -52,6 +55,7 @@ public class FileService {
     @Transactional
     public List<FileDTO> getThumbnailsByAlbumNo(int albumsNo, int page, int size) {
         int offset = (page - 1) * size;
+        log.info("앨범 번호: {}, Offset: {}, Size: {}", albumsNo, offset, size);
         return fileMapper.getThumbnailsByAlbumNo(albumsNo, offset, size);
     }
 
@@ -71,11 +75,23 @@ public class FileService {
     public int getTotalThumbnailCountByAlbumNo(int albumsNo) {
         return fileMapper.getTotalThumbnailCountByAlbumNo(albumsNo);
     }
-
+    
     // 전체 앨범의 모든 파일 조회
     @Transactional
-    public List<FileDTO> getAllThumbnails(int userNo) {
-        return fileMapper.getAllThumbnails(userNo);
+    public List<FileDTO> getAllPhotosByUser(int userNo, int page, int size) {
+        int offset = (page - 1) * size; // 페이지네이션을 위한 오프셋 계산
+        log.info("사용자 번호: {}, Offset: {}, Size: {}", userNo, offset, size);
+
+        // 사용자의 모든 앨범에서 사진을 가져오기 위한 리스트
+        List<FileDTO> allPhotos = fileMapper.getAllPhotosByUser(userNo, offset, size);
+
+        return allPhotos;
+    }
+
+    // 사용자에 대한 전체 사진 개수를 가져오는 메소드
+    @Transactional
+    public int getTotalThumbnailCountByUser(int userNo) {
+        return fileMapper.getTotalThumbnailCountByUser(userNo);
     }
 
     // 모달로 파일 조회

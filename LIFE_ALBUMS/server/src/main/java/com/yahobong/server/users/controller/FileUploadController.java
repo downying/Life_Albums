@@ -63,22 +63,24 @@ public class FileUploadController {
 
     @GetMapping("/thumbnails/{albumNo}")
     public ResponseEntity<Map<String, Object>> getThumbnailsByAlbumNo(
-            @PathVariable("albumNo") int albumNo, // albumNo가 경로에 반드시 포함되어야 함
+            @PathVariable("albumNo") int albumNo,  // albumNo가 경로에 제대로 포함되는지 확인
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "2") int size) {
-
+        
+        log.info("Controller에서 받은 albumNo: {}", albumNo);  // albumNo 로그로 확인
         List<FileDTO> thumbnails = fileService.getThumbnailsByAlbumNo(albumNo, page, size);
+        
+        // 썸네일 갯수 로그
         int totalCount = fileService.getTotalThumbnailCountByAlbumNo(albumNo);
-        int totalPages = (int) Math.ceil((double) totalCount / size);
-
+        log.info("총 썸네일 개수: {}", totalCount);
+        
         Map<String, Object> response = new HashMap<>();
         response.put("thumbnails", thumbnails);
-        response.put("currentPage", page);
         response.put("totalItems", totalCount);
-        response.put("totalPages", totalPages);
 
         return ResponseEntity.ok(response);
     }
+
 
     // 캘린더 아이콘 data로 thumbnail
     @GetMapping("/dateThumbnails/{albumNo}")
@@ -146,6 +148,36 @@ public class FileUploadController {
     public ResponseEntity<?> deleteFile(@PathVariable int fileNo) {
         fileService.deleteFile(fileNo);
         return ResponseEntity.ok("파일이 삭제되었습니다.");
+    }
+
+    // 전체 앨범
+    @GetMapping("/photos/{userNo}")
+    public ResponseEntity<Map<String, Object>> getAllPhotos(
+            @PathVariable int userNo,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "2") int size) {
+        
+        log.info("Controller에서 받은 userNo: {}", userNo);
+
+        // 사용자의 모든 사진 조회
+        List<FileDTO> photos = fileService.getAllPhotosByUser(userNo, page, size);
+        
+        // 총 카운트 조회
+        int totalCount = fileService.getTotalThumbnailCountByUser(userNo);
+        int totalPages = (int) Math.ceil((double) totalCount / size);
+        
+        // 로그 추가
+        log.info("총 사진 수: {}", totalCount);
+        log.info("현재 페이지: {}, 페이지당 아이템 수: {}", page, size);
+        log.info("반환된 사진 수: {}", photos.size()); // 반환된 사진 수 로그
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("photos", photos);
+        response.put("currentPage", page);
+        response.put("totalItems", totalCount);
+        response.put("totalPages", totalPages);
+
+        return ResponseEntity.ok(response);
     }
 
 }

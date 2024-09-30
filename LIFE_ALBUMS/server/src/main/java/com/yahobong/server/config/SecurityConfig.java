@@ -63,9 +63,20 @@ public class SecurityConfig {
 
         // 권한 및 인가 설정
         http.authorizeRequests()
-        .antMatchers("/", "/login", "/users/login", "/users/findId", "/users/join", "/users/checkId", "/users/checkMail", "/fileApi/**", "/findIdResult","/users/findPassword", "/users/resetPassword", "/users/sendAuthCode").permitAll()  // 회원가입, 로그인 및 중복 확인 경로 허용
-        .antMatchers("/albums/**").authenticated()  // 인증된 사용자만 /api/albums/** 경로에 접근 허용
-        .anyRequest().authenticated();  // 그 외의 모든 요청은 인증 필요
+        // 로그인, 회원가입 등 공용 경로는 인증 없이 접근 가능
+        .antMatchers("/", "/login", "/users/login", "/users/findId", "/users/join", 
+                    "/users/checkId", "/users/checkMail", "/findIdResult", 
+                    "/users/findPassword", "/users/resetPassword", 
+                    "/users/sendAuthCode").permitAll()
+
+        // /fileApi/** 경로는 인증된 사용자만 접근 가능
+        .antMatchers("/fileApi/**").authenticated()
+
+        // 앨범 관련 경로는 인증된 사용자만 접근 가능
+        .antMatchers("/albums/**").authenticated()
+
+        // 그 외의 모든 요청은 인증 필요
+        .anyRequest().authenticated();
 
         // 사용자 정보를 불러오는 서비스 설정
         http.userDetailsService(customUserDetailService);

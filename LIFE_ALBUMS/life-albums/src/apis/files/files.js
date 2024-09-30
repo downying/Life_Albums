@@ -20,25 +20,24 @@ export const fileInsert = async (formData, token, username) => {
 };
 
 export const thumbnails = async (albumsNo, token, page = 1, size = 2) => {
-    try {
-      const response = await api.get(`/fileApi/thumbnails/${albumsNo}`, {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-        },
-        params: { 
-          page, 
-          size 
-        }
+  try {
+      const response = await api.get(`/fileApi/thumbnails/${albumsNo}`, {  // 여기서 albumsNo가 경로에 제대로 들어가는지 확인
+          headers: { 
+              Authorization: `Bearer ${token}`,
+          },
+          params: { 
+              page, 
+              size 
+          }
       });
-      
-      // 여기서 response.data를 사용하여 받은 데이터를 처리할 수 있습니다.
-      console.log(response.data);
+      console.log("Response from thumbnails API:", response.data);  // 응답 로그 확인
       return response.data;
-    } catch (error) {
-      console.error('에러 발생:', error);
+  } catch (error) {
+      console.error("Error fetching thumbnails:", error);
       throw error;
-    }
-  };
+  }
+};
+
 
 // 파일 조회 (모달)
 export const getFile = async (fileNo, token) => {
@@ -86,8 +85,6 @@ export const updateFile = async (fileNo, fileData, token) => {
   }
 };
 
-
-
 // 파일 삭제
 export const deleteFile = async (fileNo, token) => {
   try {
@@ -102,3 +99,29 @@ export const deleteFile = async (fileNo, token) => {
       throw error;
   }
 };
+
+// 모든 앨범의 썸네일 조회
+export const allThumbnails = async (userNo, token, page = 1, size = 2) => {
+  try {
+    // 로그로 userNo와 token이 전달되었는지 확인
+    console.log(`Fetching all thumbnails for userNo: ${userNo}, token: ${token}`);
+
+    const response = await api.get(`/fileApi/photos/${userNo}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        page,
+        size,
+      },
+    });
+
+    console.log("Response data:", response.data);  // 반환된 데이터 확인
+    return response.data;  // 앨범 데이터 반환
+  } catch (error) {
+    console.error('전체 앨범 썸네일 조회 중 오류 발생:', error);
+    throw error;
+  }
+};
+
+

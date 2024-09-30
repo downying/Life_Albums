@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.yahobong.server.users.dto.FileDTO;
 
 @Mapper
@@ -14,21 +12,24 @@ public interface FileMapper {
     // 파일 등록
     void insertFile(FileDTO fileDTO);
 
-    // f.userNo = a.userNo f*
+    // 앨범의 썸네일 조회
     List<FileDTO> getThumbnailsByAlbumNo(@Param("albumsNo") int albumsNo, @Param("offset") int offset,
             @Param("limit") int limit);
 
+    // 날짜에 따른 썸네일 조회
     List<FileDTO> getDateThumbnailsByAlbumNo(@Param("albumsNo") int albumsNo, @Param("offset") int offset,
             @Param("limit") int limit, @Param("year") int year, @Param("month") int month, @Param("day") int day);
 
+    // 즐겨찾기 썸네일 조회
     List<FileDTO> getStarThumbnailsByAlbumNo(@Param("albumsNo") int albumsNo, @Param("offset") int offset,
             @Param("limit") int limit);
 
-    // f.userNo = a.userNo COUNT(*)
+    // 특정 앨범의 총 썸네일 수 조회
     int getTotalThumbnailCountByAlbumNo(int albumsNo);
 
-    // 전체 앨버의 모든 파일 조회
-    List<FileDTO> getAllThumbnails(int userNo);
+    // 전체 앨범의 모든 파일 조회 (offset, limit 추가)
+    List<FileDTO> getAllPhotosByUser(@Param("userNo") int userNo, @Param("offset") int offset, @Param("limit") int limit);
+    int getTotalThumbnailCountByUser(int userNo);
 
     // 모달로 파일 조회
     FileDTO getFileByFileNo(int fileNo);

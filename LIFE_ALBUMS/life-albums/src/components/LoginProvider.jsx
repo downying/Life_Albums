@@ -35,6 +35,7 @@ const LoginProvider = ({ children }) => {
                 logoutSetting(); // 로그아웃 처리
             } else {
                 console.log("인증 성공, 사용자 데이터:", data);
+                data.accessToken = accessToken;  // 쿠키에서 가져온 accessToken을 사용자 데이터에 추가
                 loginSetting(data); // 로그인 상태 설정
             }
         } catch (error) {
@@ -70,7 +71,8 @@ const LoginProvider = ({ children }) => {
                     Cookies.remove("rememberedId");
                     console.log("rememberedId 쿠키 삭제됨");
                 }
-    
+
+                data.accessToken = data.accessToken; // accessToken을 userInfo에 저장
                 loginSetting(data);
                 alert("로그인 성공");
                 navigate(`/albums/users/${data.userNo}`);
@@ -101,6 +103,7 @@ const LoginProvider = ({ children }) => {
     const logoutSetting = () => {
         api.defaults.headers.common.Authorization = undefined;
         Cookies.remove("accessToken");
+        Cookies.remove("refreshToken");
         console.log("액세스 토큰 삭제됨");
         setIsLoggedIn(false);
         setUserInfo(null);
@@ -109,7 +112,10 @@ const LoginProvider = ({ children }) => {
     const loginSetting = (userData) => {
         console.log("로그인 상태 설정 중");
         setIsLoggedIn(true);
-        setUserInfo(userData);  // userInfo에 사용자 데이터 설정
+        setUserInfo({
+            ...userData,
+            accessToken: userData.accessToken,  // accessToken을 명시적으로 설정
+        });  // userInfo에 사용자 데이터 설정
         setError(null);  // 로그인 성공 시 에러 초기화
     };
 
