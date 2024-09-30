@@ -180,4 +180,16 @@ public class FileUploadController {
         return ResponseEntity.ok(response);
     }
 
+    // 즐겨찾기 상태 토글
+    @PutMapping("/toggleStar/{fileNo}")
+    public ResponseEntity<String> toggleStar(@PathVariable int fileNo) {
+        try {
+            fileService.toggleStar(fileNo);
+            return ResponseEntity.ok("즐겨찾기 상태가 변경되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("즐겨찾기 상태 변경 중 오류 발생");
+        }
+    }
+
+
 }

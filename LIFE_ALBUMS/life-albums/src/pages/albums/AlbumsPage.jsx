@@ -1,16 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import { faHeart as faHeartFilled } from '@fortawesome/free-solid-svg-icons'; // 채워진 하트
+import { faHeart as faHeartOutline } from '@fortawesome/free-regular-svg-icons'; // 빈 하트
 import NavigationButton from '../../components/albums/NavigationButton';
 import AddPhotoButton from '../../components/albums/AddPhotoButton';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Link } from 'react-router-dom';
 import Sidebar from '../../components/albums/Sidebar';
 import Pagination from '../../components/albums/Pagenation';
 import Modal from '../../components/albums/Modal';
-import { fileInsert, updateFile, thumbnails, deleteFile, allThumbnails } from '../../apis/files/files';
-import { getAllAlbums } from '../../apis/albums/album';
+import { fileInsert, updateFile, thumbnails, deleteFile, allThumbnails, toggleStar } from '../../apis/files/files';
 import { LoginContext } from '../../components/LoginProvider';
 
 const AlbumsPage = () => {
@@ -28,7 +28,8 @@ const AlbumsPage = () => {
   const [error, setError] = useState(null); // 에러 상태
   const [check, setCheck] = useState(false); // 체크 상태 추가
   const albumsPerPage = 2; // 한 페이지에 표시할 사진 수
-
+  const [rotationClasses, setRotationClasses] = useState({});
+  
   // 페이지가 처음 로드될 때 localStorage에서 저장된 앨범 번호 가져오기
   useEffect(() => {
       // userInfo가 없을 때 바로 리턴
@@ -106,6 +107,29 @@ const AlbumsPage = () => {
       setLoading(false); // 로딩 끝
     }
   };
+
+
+  // 즐겨찾기 상태 토글 함수
+  const handleToggleStar = async (fileNo, token) => {
+    try {
+      const response = await toggleStar(fileNo, token); // 즐겨찾기 토글 API 호출
+      console.log("Response from toggleStar API:", response);
+
+      // 상태 업데이트: 특정 fileNo의 star 상태를 업데이트
+      setCurrentAlbum((prevAlbum) =>
+        prevAlbum.map((photo) =>
+          photo.fileNo === fileNo
+            ? { ...photo, star: !photo.star } // 즐겨찾기 상태를 토글
+            : photo
+        )
+      );
+
+      console.log("즐겨찾기 상태 변경 완료:", response);
+    } catch (error) {
+      console.error("즐겨찾기 상태 변경 중 오류 발생:", error);
+    }
+  };
+
 
   // 즐겨찾기 클릭 시 썸네일을 불러오는 함수
   const starFetchThumbnails = async (albumNo) => {
@@ -268,48 +292,91 @@ const AlbumsPage = () => {
     <div className="flex flex-col min-h-[calc(100vh-116px)] relative">
       <div className="flex flex-grow">
         {/* Sidebar에 전체 앨범 클릭 시 fetchAllThumbnails가 호출되도록 설정 */}
-        <Sidebar onSelectAlbum={handleSelectAlbum} fetchAllThumbnails={fetchAllThumbnails} currentAlbum={currentAlbum} currentAlbumNo={currentAlbumNo} setCurrentAlbumNo={setCurrentAlbumNo}/>
+        <Sidebar
+          onSelectAlbum={handleSelectAlbum}
+          fetchAllThumbnails={fetchAllThumbnails}
+          currentAlbum={currentAlbum}
+          currentAlbumNo={currentAlbumNo}
+          setCurrentAlbumNo={setCurrentAlbumNo}
+        />
   
         <div className="flex-grow flex flex-col items-center justify-center bg-gray-100 p-4">
           <div className="relative flex items-center justify-center w-[80%] h-[95%]">
-            {/* 로딩 상태일 때 UI */}
-            {loading ? (
-              <div>Loading...</div> // 로딩 중일 때 메시지 표시
-            ) : error ? (
-              <div className="text-red-500">{error}</div> // 에러 발생 시 메시지 표시
-            ) : (
-              <div className="relative w-full h-full bg-white border-2 md:border-4 border-black rounded-[10px] md:rounded-[20px] shadow-lg md:shadow-2xl flex overflow-hidden z-10">
-                {/* currentPhotos 배열이 있는 경우 */}
-                {currentPhotos.length > 0 ? (
-                  currentPhotos.map((photo, index) => (
-                    <div key={index} className="relative w-full sm:w-1/2 h-full bg-white flex flex-col justify-center items-center p-4 md:p-6">
-                      <img
-                        src={photo.filePath}
-                        alt={`Photo ${index + 1}`}
-                        className="w-[200px] md:w-[300px] h-[300px] md:h-[400px] object-cover rounded-lg shadow-md cursor-pointer"
-                        onClick={() => handleImageClick(photo)}
-                      />
-                      <div className="flex items-center mt-4">
-                        <FontAwesomeIcon icon={faHeart} className="text-red-500 mr-2" />
-                        <span className="text-xs md:text-sm">
-                          {`${photo.year}-${String(photo.month).padStart(2, '0')}-${String(photo.day).padStart(2, '0')}`}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  // currentPhotos가 비어 있을 때 표시
-                  <div className="relative w-full sm:w-1/2 h-full bg-white flex justify-center items-center p-4 md:p-6">
-                    <p>사진이 없습니다.</p>
-                  </div>
-                )}
+            {/* 왼쪽 화살표 버튼 */}
+            <NavigationButton
+              direction="left"
+              onClick={() => console.log('Left Clicked')}
+              className="absolute left-[-40px] md:left-[-60px] top-[50%] transform -translate-y-1/2 text-5xl md:text-7xl text-black z-10 bg-white p-2 md:p-4 rounded-full shadow-lg"
+            />
   
-                {/* Add Photo Button */}
-                {addPhotoButtonPosition !== 'none' && (
-                  <div className={`relative w-full sm:w-1/2 h-full bg-white flex justify-center items-center p-4 md:p-6 ${addPhotoButtonPosition === 'left' ? 'order-1' : 'order-2'}`}>
-                    <AddPhotoButton onClick={handleNoImageClick} />
+            {/* 앨범 UI */}
+            <div className="relative w-full h-full bg-white border-2 md:border-4 border-black rounded-[10px] md:rounded-[20px] shadow-lg md:shadow-2xl flex overflow-hidden z-10">
+              {currentPhotos.length > 0 ? (
+                currentPhotos.map((photo, index) => (
+                  <div key={index} className="relative w-full sm:w-1/2 h-full bg-white flex flex-col justify-center items-center p-4 md:p-6">
+                    <img
+                      src={photo.filePath}
+                      alt={`Photo ${index + 1}`}
+                      className="w-[200px] md:w-[300px] h-[300px] md:h-[400px] object-contain rounded-lg shadow-md cursor-pointer"
+                      onClick={() => handleImageClick(photo)}
+                    />
+                    <div className="flex items-center mt-4 space-x-2">
+                      <FontAwesomeIcon
+                        icon={photo.star ? faHeartFilled : faHeartOutline}
+                        onClick={() => handleToggleStar(photo.fileNo, userInfo.token)}
+                        className={`cursor-pointer ${photo.star ? 'text-red-500' : 'text-gray-400'}`}
+                      />
+                      <span className="text-xs md:text-sm">
+                        {`${photo.year}-${String(photo.month).padStart(2, '0')}-${String(photo.day).padStart(2, '0')}`}
+                      </span>
+                    </div>
                   </div>
-                )}
+                ))
+              ) : (
+                <div className="relative w-full sm:w-1/2 h-full bg-white flex justify-center items-center p-4 md:p-6">
+                  <p>사진이 없습니다.</p>
+                </div>
+              )}
+  
+              {/* Add Photo Button */}
+              {addPhotoButtonPosition !== 'none' && (
+                <div className={`relative w-full sm:w-1/2 h-full bg-white flex justify-center items-center p-4 md:p-6 ${addPhotoButtonPosition === 'left' ? 'order-1' : 'order-2'}`}>
+                  <AddPhotoButton onClick={handleNoImageClick} />
+                </div>
+              )}
+            </div>
+  
+            {/* 오른쪽 화살표 버튼 */}
+            <NavigationButton
+              direction="right"
+              onClick={() => console.log('Right Clicked')}
+              className="absolute right-[-60px] top-[50%] transform -translate-y-1/2 text-7xl text-black z-10 bg-white p-4 rounded-full shadow-lg"
+            />
+          </div>
+  
+          {/* 상단 오른쪽 부분 */}
+          <div className="absolute right-12 top-8 flex flex-col items-start space-y-4 z-10">
+            <button className="flex items-center space-x-2">
+              <FontAwesomeIcon icon={faCalendarAlt} className="text-black text-xl" onClick={handleCalendarIconClick} />
+              <span className="text-black">+ 사진 추가하기</span>
+            </button>
+            <div className="flex items-center space-x-2 cursor-pointer" onClick={handleStarIconClick}>
+              <FontAwesomeIcon icon={faHeart} className="text-red-500 text-xl" />
+              <span className="text-black">즐겨찾기 모아보기</span>
+            </div>
+  
+            {showDatePicker && (
+              <div className="relative">
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => {
+                    setStartDate(date);
+                    const dateArray = [date.getFullYear(), date.getMonth() + 1, date.getDate()];
+                    setDataStartDate(dateArray);
+                    celendarFetchThumbnails(currentAlbumNo, dateArray);
+                  }}
+                  inline
+                />
               </div>
             )}
           </div>
@@ -324,9 +391,9 @@ const AlbumsPage = () => {
       {/* Modal 창 */}
       {isModalOpen && (
         <Modal
-          fileNo={fileNo} 
+          fileNo={fileNo}
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={handleCloseModal}
           onDelete={handleDeleteFile}
           onUpdate={handleUpdateFile}
           token={userInfo.token}
@@ -336,6 +403,7 @@ const AlbumsPage = () => {
       )}
     </div>
   );
+  
   
 };
 

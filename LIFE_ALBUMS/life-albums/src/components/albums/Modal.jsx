@@ -87,10 +87,11 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
     const selectedFile = e.target.files[0];
     setAlbum((prevAlbum) => ({
       ...prevAlbum,
-      file: selectedFile,
-      imgSrc: URL.createObjectURL(selectedFile)
+      file: selectedFile,  // 실제 파일 객체 저장
+      imgSrc: URL.createObjectURL(selectedFile)  // 이미지 미리보기
     }));
   };
+  
   
   if (!isOpen) return null;
 
@@ -109,7 +110,7 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
             <img
               src={album.imgSrc}
               alt="Album"
-              className="w-[300px] h-[400px] object-cover rounded-lg shadow-md"
+              className="w-[300px] h-[400px] object-contain rounded-lg shadow-md"
             />
           ) : (
             <div className="w-[300px] h-[400px] bg-gray-200 flex items-center justify-center rounded-lg shadow-md">

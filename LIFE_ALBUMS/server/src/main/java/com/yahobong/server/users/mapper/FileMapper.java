@@ -39,4 +39,7 @@ public interface FileMapper {
 
     // 파일 삭제
     void deleteFile(int fileNo);
+
+    // 즐겨찾기 상태 토글
+    void toggleStarByFileNo(int fileNo);
 }
