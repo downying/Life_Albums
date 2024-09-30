@@ -87,12 +87,35 @@
         WHERE a.albumsNo = #{albumsNo}
     </select>
 
-     <!-- 모든 앨범의 썸네일 조회 (전체 앨범 조회 기능) -->
-    <select id="getAllThumbnails" resultType="FileDTO">
-        SELECT u.userNo, u.name, u.mail, a.albumsNo, a.title
+    <!-- 모든 앨범에 있는 사진 조회 (특정 사용자) -->
+    <select id="getAllPhotosByUser" resultType="FileDTO">
+        SELECT 
+            u.userNo,
+            u.name,
+            a.albumsNo,
+            a.title,
+            f.fileNo,
+            f.content,
+            f.year,
+            f.month,
+            f.day,
+            f.star,
+            f.filePath
         FROM users u
         JOIN albums a ON u.userNo = a.userNo
-        WHERE u.userNo = #{userNo}  <!-- 특정 사용자의 모든 파일 조회 -->
+        JOIN files f ON a.albumsNo = f.albumsNo
+        WHERE u.userNo = #{userNo}  <!-- 특정 사용자의 모든 앨범에 있는 사진 조회 -->
+        ORDER BY f.year ASC, f.month ASC, f.day ASC, f.fileNo ASC
+        LIMIT 
+            #{offset}, #{limit}
+    </select>
+
+    <select id="getTotalThumbnailCountByUser" resultType="int">
+        SELECT COUNT(*)
+        FROM files f
+        INNER JOIN albums a ON f.albumsNo = a.albumsNo
+        INNER JOIN users u ON a.userNo = u.userNo
+        WHERE u.userNo = #{userNo}
     </select>
 
     <!-- fileNo로 단일 파일 정보 가져오기 -->

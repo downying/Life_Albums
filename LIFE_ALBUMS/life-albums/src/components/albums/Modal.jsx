@@ -88,6 +88,7 @@ const Modal = ({ fileNo, isOpen, onClose, onDelete, onUpdate, token, onRegister,
     setAlbum((prevAlbum) => ({
       ...prevAlbum,
       file: selectedFile,
+      imgSrc: URL.createObjectURL(selectedFile)
     }));
   };
   

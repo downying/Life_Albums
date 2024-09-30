@@ -23,20 +23,6 @@ public class AlbumController {
     @Autowired
     private AlbumService albumService;
 
-    @Autowired
-    private FileService fileService;
-
-    // 특정 유저의 전체 앨범 조회
-    @GetMapping("/all/{userNo}")
-    public ResponseEntity<List<FileDTO>> getAllThumbnails(@PathVariable("userNo") int userNo) {
-        try {
-            List<FileDTO> allFiles = fileService.getAllThumbnails(userNo);
-            return ResponseEntity.ok(allFiles);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-
     // 특정 유저의 앨범 조회
     @GetMapping("/users/{userNo}")  
     public ResponseEntity<List<AlbumDTO>> getAlbumsByUserNo(@PathVariable("userNo") int userNo) {
