@@ -42,4 +42,10 @@ public interface FileMapper {
 
     // 즐겨찾기 상태 토글
     void toggleStarByFileNo(int fileNo);
+
+    // 캘린더로 보기 - 다운
+    List<FileDTO> getThumbnailsByUserAndDate(@Param("userNo") int userNo, 
+                                              @Param("year") int year, 
+                                              @Param("month") int month, 
+                                              @Param("day") int day);
 }

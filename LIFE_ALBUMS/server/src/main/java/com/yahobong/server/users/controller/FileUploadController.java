@@ -45,6 +45,11 @@ public class FileUploadController {
             // data를 FileDTO로 변환
             FileDTO fileDto = objectMapper.readValue(data, FileDTO.class);
 
+            // albumsNo가 null일 경우 예외 처리
+            if (fileDto.getAlbumsNo() <= 0) {
+                return ResponseEntity.badRequest().body("앨범 번호(albumsNo)는 필수입니다.");
+            }
+
             // 파일 저장 처리
             FileDTO savedFile = fileService.saveFile(file, fileDto, username);
             return ResponseEntity.ok(savedFile);
@@ -185,5 +190,15 @@ public class FileUploadController {
         List<FileDTO> photos = fileService.getDateThumbnailsByDate(year, month, day);
         
         return ResponseEntity.ok(photos);
+    }
+
+    // 캘린더로 보기 - 다운
+    @GetMapping("/calendar/{userNo}")
+    public List<FileDTO> getThumbnailsByUserAndDate(
+            @PathVariable("userNo") int userNo,
+            @RequestParam("year") int year,
+            @RequestParam("month") int month,
+            @RequestParam("day") int day) {
+        return fileService.getThumbnailsByUserAndDate(userNo, year, month, day);
     }
 }

@@ -40,14 +40,13 @@ const AppRoutes = () => {
         const publicRoutes = ['/join', '/login', '/findId', '/calendar', '/findIdResult', '/findPassword', '/resetPassword'];
         
         // 앨범 관련 경로를 처리할 수 있도록 수정
-        const albumRegex = /^\/albums\/\d+$/;  // 앨범 번호가 있는 경우 처리
-        const userAlbumRegex = /^\/albums\/users\/\d+$/;  // 사용자 앨범 경로 처리
+        // const albumRegex = /^\/albums\/\d+$/;  // 앨범 번호가 있는 경우 처리
+        // const userAlbumRegex = /^\/albums\/users\/\d+$/;  // 사용자 앨범 경로 처리
 
         if (!publicRoutes.includes(currentLocation.pathname)) {
             if (isLoggedIn && userInfo) {
                 const userPath = `/albums/users/${userInfo.userNo}`;
-                // 현재 경로가 특정 앨범 경로일 경우에는 리다이렉트하지 않음
-                if (!currentLocation.pathname.match(albumRegex) && !currentLocation.pathname.match(userAlbumRegex)) {
+                if (currentLocation.pathname !== userPath) {
                     navigate(userPath);
                 }
             } else {

@@ -129,4 +129,9 @@ public class FileService {
     public void toggleStar(int fileNo) {
         fileMapper.toggleStarByFileNo(fileNo);
     }
+
+    // 캘린더로 보기 - 다운
+    public List<FileDTO> getThumbnailsByUserAndDate(int userNo, int year, int month, int day) {
+        return fileMapper.getThumbnailsByUserAndDate(userNo, year, month, day);
+    }
 }

@@ -150,4 +150,32 @@
         WHERE fileNo = #{fileNo}
     </update>
 
+    <!-- 캘린더로 보기 - 다운 -->
+    <select id="getThumbnailsByUserAndDate" resultType="com.yahobong.server.users.dto.FileDTO">
+        SELECT 
+            f.fileNo, 
+            f.albumsNo, 
+            f.content, 
+            f.year, 
+            f.month, 
+            f.day, 
+            f.star, 
+            f.filePath
+        FROM 
+            files f
+        INNER JOIN 
+            albums a ON f.albumsNo = a.albumsNo
+        INNER JOIN 
+            users u ON a.userNo = u.userNo
+        WHERE 
+            u.userNo = #{userNo}
+            AND f.year = #{year}
+            AND f.month = #{month}
+            AND f.day = #{day}
+         ORDER BY 
+            f.star DESC,  -- star가 있는 사진이 위로 오도록 정렬
+            f.fileNo ASC  -- 그 다음에 fileNo로 정렬
+    </select>
+
+
 </mapper>
