@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash, faSave } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { addAlbum, getAlbumsByUserNo, updateAlbumTitle, deleteAlbum } from '../../apis/albums/album';
 import { LoginContext } from '../LoginProvider';
 import { allThumbnails, thumbnails } from '../../apis/files/files';
 
-const Sidebar = ({ onSelectAlbum, currentAlbum, currentAlbumNo, setCurrentAlbumNo }) => {
+const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbumNo, setCurrentAlbumNo }) => {
   const { userInfo } = useContext(LoginContext);
   const [albums, setAlbums] = useState([]);
   const [editingAlbum, setEditingAlbum] = useState(null);
@@ -49,42 +49,45 @@ const Sidebar = ({ onSelectAlbum, currentAlbum, currentAlbumNo, setCurrentAlbumN
     }
   };
 
+  // 전체 앨범 클릭 시 썸네일 조회
   const handleAllAlbumsClick = () => {
-    console.log("전체 앨범 클릭됨");
-    console.log("userInfo:", userInfo);
+      console.log("전체 앨범 클릭됨");
+      console.log("userInfo:", userInfo);
 
-    if (userInfo && userInfo.userNo && userInfo.accessToken) {
-        console.log("allThumbnails 호출 준비 완료");
-        setIsAllAlbumsActive(true); // 전체 앨범 활성화 상태 설정
-        setSelectedAlbumNo(null); // 선택된 앨범 해제
-        setCurrentAlbumNo(null); // 현재 앨범 선택 해제
-
-        // 전체 앨범 썸네일을 불러오는 API 호출
-        allThumbnails(userInfo.userNo, userInfo.accessToken)
-            .then((data) => {
-                console.log("전체 앨범의 썸네일 조회 성공:", data);
-                setCurrentThumbnails(data.thumbnails || []);
-            })
-            .catch((error) => {
-                console.error("전체 앨범 썸네일 조회 중 오류:", error);
-            });
-    } else {
-        console.log("사용자 정보가 없습니다."); // userInfo가 없는 경우 로그 출력
-    }
-};
-
+      if (userInfo && userInfo.userNo && userInfo.accessToken) {
+          console.log("allThumbnails 호출 준비 완료");
+          setIsAllAlbumsActive(true); // 전체 앨범 활성화 상태 설정
+          setSelectedAlbumNo(null); // 선택된 앨범 해제
+          setCurrentAlbumNo(null); // 현재 앨범 선택 해제
+          fetchAllThumbnails();
+      } else {
+          console.log("사용자 정보가 없습니다."); // userInfo가 없는 경우 로그 출력
+      }
+  };
 
   // 사이드바에서 앨범을 선택
   const handleAlbumClick = (albumNo) => {
     console.log('선택된 앨범 번호:', albumNo); // 선택된 앨범 번호 로그
     setSelectedAlbumNo(albumNo);
-    onSelectAlbum(albumNo); // AlbumsPage의 handleSelectAlbum 호출
-    fetchThumbnails(albumNo); // 해당 앨범의 썸네일 불러오기
-    localStorage.setItem("selectedAlbumNo", albumNo); // 앨범 번호 로컬스토리지에 저장
-    setIsAllAlbumsActive(false); // 전체 앨범 비활성화
-};
+    fetchThumbnails(albumNo); // 썸네일을 먼저 불러온 후
+    onSelectAlbum(albumNo); // 앨범 선택 처리
+  };
+  
+  // 전체 앨범의 썸네일 조회
+  useEffect(() => {
+    if (userInfo && userInfo.accessToken) {
+      console.log("fetchAllThumbnails 호출 준비 완료.");
 
-  // 앨범 추가 함수 (기존 코드 유지)
+      if (fetchAllThumbnails) {
+        fetchAllThumbnails(); // 전체 앨범 썸네일 불러오기
+      }
+
+    } else {
+      console.log("사용자 정보가 없습니다.");  // userInfo가 없는 경우 로그 출력
+    }
+  }, [userInfo]);
+
+  // 앨범 추가 함수
   const handleAddAlbum = async () => {
     if (userInfo && userInfo.userNo) {
       const newAlbum = {
@@ -107,7 +110,7 @@ const Sidebar = ({ onSelectAlbum, currentAlbum, currentAlbumNo, setCurrentAlbumN
     setNewTitle(album.title);
   };
 
-  // 앨범 제목 저장 함수 (기존 코드 유지)
+  // 앨범 제목 저장 함수 
   const handleSaveClick = async (albumsNo) => {
     const targetAlbumNo = albumsNo || editingAlbum;
     
@@ -125,7 +128,7 @@ const Sidebar = ({ onSelectAlbum, currentAlbum, currentAlbumNo, setCurrentAlbumN
     }
   };  
 
-  // 앨범 삭제 함수 (기존 코드 유지)
+  // 앨범 삭제 함수
   const handleDeleteClick = async (albumsNo) => {
     const confirmDelete = window.confirm('정말로 삭제하시겠습니까?');
     if (confirmDelete) {
@@ -140,46 +143,31 @@ const Sidebar = ({ onSelectAlbum, currentAlbum, currentAlbumNo, setCurrentAlbumN
 
   // 전체 앨범의 썸네일 조회
   useEffect(() => {
-    if (userInfo && userInfo.accessToken) {
-      console.log("allThumbnails 호출 준비 완료.");
-      allThumbnails(userInfo.userNo, userInfo.accessToken)
-        .then((data) => {
-          console.log("전체 앨범 썸네일 조회 성공:", data);
-          setCurrentThumbnails(data.thumbnails || []);
-        })
-        .catch((error) => {
-          console.error("전체 앨범 썸네일 조회 중 오류:", error);
-        });
-    } else {
-      console.log("사용자 정보가 없습니다.");  // userInfo가 없는 경우 로그 출력
-    }
-  }, [userInfo]);
-
-  useEffect(() => {
     console.log("현재 앨범 썸네일 상태:", currentThumbnails); // 상태 변화 로그
   }, [currentThumbnails]);
 
   useEffect(() => {
-    console.log("현재 앨범 번호:", currentAlbumNo);
-    if (userInfo) {
-        if (currentAlbumNo) {
-            fetchThumbnails(currentAlbumNo);
-        } else {
-            // currentAlbumNo가 null일 때 전체 앨범 썸네일을 가져옴
-            allThumbnails(userInfo.userNo, userInfo.accessToken)
-                .then((data) => {
-                    console.log("전체 앨범의 썸네일 조회 성공:", data);
-                    setCurrentThumbnails(data.thumbnails || []);
-                })
-                .catch((error) => {
-                    console.error("전체 앨범 썸네일 조회 중 오류:", error);
-                });
-        }
-    } else {
-        console.log("사용자 정보가 없습니다.");
-    }
-}, [currentAlbumNo, userInfo, isAllAlbumsActive]);
+      console.log("현재 앨범 번호:", currentAlbumNo);
+      if (userInfo) {
+          if (currentAlbumNo) {
+              fetchThumbnails(currentAlbumNo);
+          } else {
+              fetchAllThumbnails();
+          }
+      } else {
+          console.log("사용자 정보가 없습니다.");
+      }
+  }, [currentAlbumNo, userInfo, isAllAlbumsActive]);
 
+  useEffect(() => {
+    if (userInfo && fetchAllThumbnails && typeof fetchAllThumbnails === 'function') {
+            fetchAllThumbnails();
+        }
+    }, [userInfo]);
+
+  const handleCalendarView = () => {
+    navigate('/calendar', { state: { userInfo } }); // userInfo를 함께 넘겨줌
+  };
 
   return (
     <div className="w-64 bg-white text-black p-4 flex flex-col justify-between">
@@ -226,9 +214,10 @@ const Sidebar = ({ onSelectAlbum, currentAlbum, currentAlbumNo, setCurrentAlbumN
       </div>
 
       <div className="p-4">
-        <button className="p-2 w-full bg-black text-white text-center rounded" onClick={() => navigate('/calendar')}>
+      <button className="p-2 w-full bg-black text-white text-center rounded" 
+              onClick={handleCalendarView}>
           캘린더로 보기
-        </button>
+      </button>
       </div>
     </div>
   );
