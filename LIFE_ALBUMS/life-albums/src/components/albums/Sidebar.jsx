@@ -6,14 +6,13 @@ import { addAlbum, getAlbumsByUserNo, updateAlbumTitle, deleteAlbum } from '../.
 import { LoginContext } from '../LoginProvider';
 import { allThumbnails, thumbnails } from '../../apis/files/files';
 
-const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbumNo, setCurrentAlbumNo }) => {
+const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbumNo, setCurrentAlbumNo, isAllAlbumsActive, setIsAllAlbumsActive }) => {
   const { userInfo } = useContext(LoginContext);
   const [albums, setAlbums] = useState([]);
   const [editingAlbum, setEditingAlbum] = useState(null);
   const [newTitle, setNewTitle] = useState('');
   const [selectedAlbumNo, setSelectedAlbumNo] = useState(null);
   const [currentThumbnails, setCurrentThumbnails] = useState([]);
-  const [isAllAlbumsActive, setIsAllAlbumsActive] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);  // 로딩 상태 관리
 
@@ -56,7 +55,7 @@ const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbum
 
       if (userInfo && userInfo.userNo && userInfo.accessToken) {
           console.log("allThumbnails 호출 준비 완료");
-          setIsAllAlbumsActive(true); // 전체 앨범 활성화 상태 설정
+          setIsAllAlbumsActive(true); // 전체 앨범이 선택되었음을 표시
           setSelectedAlbumNo(null); // 선택된 앨범 해제
           setCurrentAlbumNo(null); // 현재 앨범 선택 해제
           fetchAllThumbnails();
@@ -67,10 +66,11 @@ const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbum
 
   // 사이드바에서 앨범을 선택
   const handleAlbumClick = (albumNo) => {
-    console.log('선택된 앨범 번호:', albumNo); // 선택된 앨범 번호 로그
+    console.log('선택된 앨범 번호:', albumNo);
+    setIsAllAlbumsActive(false);  // 특정 앨범이 선택되면 전체 앨범이 비활성화됨
     setSelectedAlbumNo(albumNo);
-    fetchThumbnails(albumNo); // 썸네일을 먼저 불러온 후
-    onSelectAlbum(albumNo); // 앨범 선택 처리
+    fetchThumbnails(albumNo);
+    onSelectAlbum(albumNo);
   };
   
   // 전체 앨범의 썸네일 조회
