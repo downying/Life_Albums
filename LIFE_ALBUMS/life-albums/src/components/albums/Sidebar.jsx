@@ -6,14 +6,13 @@ import { addAlbum, getAlbumsByUserNo, updateAlbumTitle, deleteAlbum } from '../.
 import { LoginContext } from '../LoginProvider';
 import { allThumbnails, thumbnails } from '../../apis/files/files';
 
-const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbumNo, setCurrentAlbumNo }) => {
+const Sidebar = ({ onSelectAlbum, fetchAllThumbnails, currentAlbum, currentAlbumNo, setCurrentAlbumNo, isAllAlbumsActive, setIsAllAlbumsActive }) => {
   const { userInfo } = useContext(LoginContext);
   const [albums, setAlbums] = useState([]);
   const [editingAlbum, setEditingAlbum] = useState(null);
   const [newTitle, setNewTitle] = useState('');
   const [selectedAlbumNo, setSelectedAlbumNo] = useState(null);
   const [currentThumbnails, setCurrentThumbnails] = useState([]);
-  const [isAllAlbumsActive, setIsAllAlbumsActive] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);  // 로딩 상태 관리
 // 사용자 앨범 목록 불러오기
@@ -51,14 +50,30 @@ useEffect(() => {
 
   // 전체 앨범 클릭 시 썸네일 조회
   const handleAllAlbumsClick = () => {
+
     setIsAllAlbumsActive(true);
     setSelectedAlbumNo(null);
     setCurrentAlbumNo(null);
     fetchAllThumbnails();
+
+      console.log("전체 앨범 클릭됨");
+      console.log("userInfo:", userInfo);
+
+      if (userInfo && userInfo.userNo && userInfo.accessToken) {
+          console.log("allThumbnails 호출 준비 완료");
+          setIsAllAlbumsActive(true); // 전체 앨범이 선택되었음을 표시
+          setSelectedAlbumNo(null); // 선택된 앨범 해제
+          setCurrentAlbumNo(null); // 현재 앨범 선택 해제
+          fetchAllThumbnails();
+      } else {
+          console.log("사용자 정보가 없습니다."); // userInfo가 없는 경우 로그 출력
+      }
+
   };
 
-  // 앨범 선택 로직 수정
+
   const handleAlbumClick = (albumNo) => {
+
     setIsAllAlbumsActive(false); // 전체 앨범 비활성화
     setSelectedAlbumNo(albumNo);
     setCurrentAlbumNo(albumNo);  // currentAlbumNo 설정

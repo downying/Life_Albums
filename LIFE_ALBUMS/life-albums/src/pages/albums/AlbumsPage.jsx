@@ -16,6 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 const AlbumsPage = () => {
   const { userInfo } = useContext(LoginContext); // 로그인 정보를 가져옴
+  const [isAllAlbumsActive, setIsAllAlbumsActive] = useState(false); // 상태 정의
   const [fileNo, setFileNo] = useState(null); // 선택된 파일 번호
   const [startDate, setStartDate] = useState(new Date()); // 날짜 선택 상태
   const [dataStartDate, setDataStartDate] = useState([]); // 선택된 날짜 배열
@@ -281,12 +282,22 @@ const AlbumsPage = () => {
     <div className="flex flex-col min-h-[calc(100vh-116px)] relative">
       <div className="flex flex-grow">
         <Sidebar
-            onSelectAlbum={handleSelectAlbum}
-            fetchAllThumbnails={fetchAllThumbnails}
-            currentAlbum={currentAlbum}
-            currentAlbumNo={currentAlbumNo}
-            setCurrentAlbumNo={setCurrentAlbumNo}
-          />
+          onSelectAlbum={handleSelectAlbum}
+          fetchAllThumbnails={fetchAllThumbnails}
+          currentAlbum={currentAlbum}
+          currentAlbumNo={currentAlbumNo}
+          setCurrentAlbumNo={setCurrentAlbumNo}
+          isAllAlbumsActive={isAllAlbumsActive}  // 이 상태를 Sidebar에 전달
+          setIsAllAlbumsActive={setIsAllAlbumsActive}  // 상태를 업데이트하는 함수도 전달
+        />
+        <div className="content-area">
+        {/* 오른쪽 상단 부분 렌더링 */}
+        {!isAllAlbumsActive && (
+          <div className="right-side-icons">
+            {/* 캘린더 아이콘, 하트 아이콘, 사진 추가 버튼 등 */}
+          </div>
+        )}
+      </div>
 
         <div className="flex-grow flex flex-col items-center justify-center bg-gray-100 p-4">
           <div className="relative flex items-center justify-center w-[80%] h-[95%]">
@@ -342,35 +353,37 @@ const AlbumsPage = () => {
           </div>
   
           {/* 상단 오른쪽 부분 */}
-          <div className="absolute right-12 top-8 flex flex-col items-start space-y-4 z-10">
-            <div className="flex items-center space-x-4">
-              <button>
-                <FontAwesomeIcon icon={faCalendarAlt} className="text-black text-xl" onClick={handleCalendarIconClick} />
+          {!isAllAlbumsActive && (
+            <div className="absolute right-12 top-8 flex flex-col items-start space-y-4 z-10">
+              <div className="flex items-center space-x-4">
+                <button>
+                  <FontAwesomeIcon icon={faCalendarAlt} className="text-black text-xl" onClick={handleCalendarIconClick} />
+                </button>
+                <div className="cursor-pointer" onClick={handleStarIconClick}>
+                  <FontAwesomeIcon icon={faHeart} className="text-red-500 text-xl" />
+                </div>
+              </div>
+
+              <button className="flex items-center space-x-2">
+                <span className="text-black" onClick={handleNoImageClick}>+ 사진 추가하기</span>
               </button>
-              <div className="cursor-pointer" onClick={handleStarIconClick}>
-                <FontAwesomeIcon icon={faHeart} className="text-red-500 text-xl" />
-              </div>
+
+              {showDatePicker && (
+                <div className="absolute right-0 top-16 z-20">
+                  <DatePicker
+                    selected={startDate}
+                    onChange={(date) => {
+                      setStartDate(date);
+                      const dateArray = [date.getFullYear(), date.getMonth() + 1, date.getDate()];
+                      setDataStartDate(dateArray);
+                      celendarFetchThumbnails(currentAlbumNo, dateArray);
+                    }}
+                    inline
+                  />
+                </div>
+              )}
             </div>
-
-            <button className="flex items-center space-x-2">
-              <span className="text-black" onClick={handleNoImageClick}>+ 사진 추가하기</span>
-            </button>
-
-            {showDatePicker && (
-              <div className="absolute right-0 top-16 z-20"> {/* DatePicker를 오른쪽에 고정 */}
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => {
-                    setStartDate(date);
-                    const dateArray = [date.getFullYear(), date.getMonth() + 1, date.getDate()];
-                    setDataStartDate(dateArray);
-                    celendarFetchThumbnails(currentAlbumNo, dateArray);
-                  }}
-                  inline
-                />
-              </div>
-            )}
-          </div>
+          )}
 
           {/* 페이지네이션 */}
           <div className="mt-2">
