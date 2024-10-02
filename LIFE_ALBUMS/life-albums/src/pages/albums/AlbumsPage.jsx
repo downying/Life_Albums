@@ -143,9 +143,9 @@ const AlbumsPage = () => {
   useEffect(() => {
     if (currentAlbumNo) {
       if (starClick) {
-        starFetchThumbnails(currentAlbumNo); // 즐겨찾기 클릭 시 썸네일 불러오기
-      } else if (userInfo && userInfo.accessToken) {
-        fetchThumbnails(currentAlbumNo); // 선택된 앨범의 썸네일 불러오기
+        starFetchThumbnails(currentAlbumNo);
+      } else if (userInfo && userInfo.token) {
+        fetchThumbnails(currentAlbumNo);
       }
     }
   }, [currentAlbumNo, starClick, userInfo]);
