@@ -159,18 +159,23 @@ export const toggleStar = async (fileNo, token) => {
 //   }
 // };
 
-export const getThumbnailsByUserAndDate = async (userNo, year, month, day) => {
+export const getThumbnailsByUserAndDate = async (userNo, year, month, day, token) => {
   try {
+    // console.log(`API 요청 파라미터: userNo=${userNo}, year=${year}, month=${month}, day=${day}`);
     const response = await api.get(`/fileApi/calendar/${userNo}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,  // 인증 토큰 추가
+      },
       params: {
         year,
         month,
         day,
       },
     });
+    // console.log('API 응답:', response.data);
     return response.data;
   } catch (error) {
-    console.error("특정 사용자와 날짜의 사진 가져오기 중 오류:", error);
+    console.error(`썸네일 데이터를 가져오는 중 오류 발생: ${year}-${month}-${day}`, error);
     throw error;
   }
 };

@@ -132,6 +132,7 @@ public class FileService {
 
     // 캘린더로 보기 - 다운
     public List<FileDTO> getThumbnailsByUserAndDate(int userNo, int year, int month, int day) {
+        System.out.println("Received request with userNo: " + userNo + ", year: " + year + ", month: " + month + ", day: " + day);
         return fileMapper.getThumbnailsByUserAndDate(userNo, year, month, day);
     }
 }

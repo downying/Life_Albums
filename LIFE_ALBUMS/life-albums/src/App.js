@@ -31,29 +31,36 @@ const AppRoutes = () => {
     const currentLocation = useLocation();
 
     useEffect(() => {
-        // 로그인 상태를 확인 중일 때는 리다이렉트하지 않음
-        if (isCheckingLogin) {
-            return;
-        }
-
-        // 회원가입, 로그인, 아이디 찾기 페이지는 예외로 처리
-        const publicRoutes = ['/join', '/login', '/findId', '/calendar', '/findIdResult', '/findPassword', '/resetPassword'];
+      if (isCheckingLogin) {
+        return; // 로그인 상태 확인 중에는 리다이렉트하지 않음
+      }
+    
+      const publicRoutes = ['/join', '/login', '/findId', '/calendar', '/findIdResult', '/findPassword', '/resetPassword'];
+    
+      // 현재 경로를 확인하기 위한 정규 표현식
+      const albumRegex = /^\/albums\/\d+$/;
+      const userAlbumRegex = /^\/albums\/users\/\d+$/;
+    
+      // 로그인되지 않았고, 비공개 페이지로 이동하려고 할 때 로그인 페이지로 리다이렉트
+      if (!isLoggedIn && !publicRoutes.includes(currentLocation.pathname)) {
+        navigate('/login');
+      }
+    
+      if (isLoggedIn && userInfo) {
+        const userAlbumsPath = `/albums/users/${userInfo.userNo}`;
         
-        // 앨범 관련 경로를 처리할 수 있도록 수정
-        // const albumRegex = /^\/albums\/\d+$/;  // 앨범 번호가 있는 경우 처리
-        // const userAlbumRegex = /^\/albums\/users\/\d+$/;  // 사용자 앨범 경로 처리
-
-        if (!publicRoutes.includes(currentLocation.pathname)) {
-            if (isLoggedIn && userInfo) {
-                const userPath = `/albums/users/${userInfo.userNo}`;
-                if (currentLocation.pathname !== userPath) {
-                    navigate(userPath);
-                }
-            } else {
-                navigate('/login');
-            }
+        // 앨범 경로와 사용자 앨범 경로를 예외로 처리
+        const isAlbumPage = albumRegex.test(currentLocation.pathname);
+        const isUserAlbumPage = userAlbumRegex.test(currentLocation.pathname);
+    
+        // 캘린더나 앨범 관련 경로가 아니면 리다이렉트
+        if (currentLocation.pathname !== '/calendar' && !isAlbumPage && !isUserAlbumPage) {
+          console.log('리다이렉트 대상 경로:', currentLocation.pathname);
+          navigate(userAlbumsPath);
         }
+      }
     }, [isLoggedIn, isCheckingLogin, navigate, currentLocation.pathname, userInfo]);
+    
 
     return (
       <Routes>
@@ -75,14 +82,14 @@ const AppRoutes = () => {
         {/* 회원가입 */}
         <Route path="/join" element={<JoinPage />} />
         
+        {/* 캘린더 */}
+        <Route path="/calendar" element={<CalendarPage />} />
+        
         {/* 사용자 앨범 */}
         <Route path="/albums/users/:userNo" element={<AlbumsPage />} />
 
         {/* 특정 앨범 */}
         <Route path="/albums/:albumNo" element={<AlbumsPage />} />
-
-        {/* 캘린더 */}
-        <Route path="/calendar" element={<CalendarPage />} />
 
         {/* 기본 경로 처리 */}
         <Route path="/" element={<LoginPage />} />

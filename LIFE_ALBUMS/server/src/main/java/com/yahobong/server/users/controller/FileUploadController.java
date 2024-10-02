@@ -194,11 +194,19 @@ public class FileUploadController {
 
     // 캘린더로 보기 - 다운
     @GetMapping("/calendar/{userNo}")
-    public List<FileDTO> getThumbnailsByUserAndDate(
-            @PathVariable("userNo") int userNo,
+    public ResponseEntity<?> getThumbnailsByUserAndDate(
+        @PathVariable("userNo") int userNo,
             @RequestParam("year") int year,
             @RequestParam("month") int month,
             @RequestParam("day") int day) {
-        return fileService.getThumbnailsByUserAndDate(userNo, year, month, day);
+        log.info("캘린더 조회 요청 - 사용자 번호: {}, 연도: {}, 월: {}, 일: {}", userNo, year, month, day);
+        
+        // 서비스 호출 및 썸네일 수 확인
+        List<FileDTO> files = fileService.getThumbnailsByUserAndDate(userNo, year, month, day);
+        log.info("조회된 썸네일 수: {}", files.size());
+
+        return new ResponseEntity<>(files, HttpStatus.OK);
     }
+
+
 }

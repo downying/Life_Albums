@@ -2,29 +2,24 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const DayCell = ({ day, thumbnails = [], onClick }) => {
-  const navigate = useNavigate();
-
-  const handleThumbnailClick = (albumNo) => {
-    // 앨범 페이지로 이동
-    navigate(`/albums/${albumNo}`);
+  const handleThumbnailClick = () => {
+    if (thumbnails.length > 0) {
+      onClick(day, thumbnails); // day와 thumbnails를 전달
+    }
   };
 
   return (
     <div
-      onClick={() => {
-        if (thumbnails.length > 0) {
-          handleThumbnailClick(thumbnails[0].albumsNo); // 첫 번째 썸네일의 앨범 번호로 이동
-        }
-      }}
-      className="calendar-day flex flex-col items-stretch justify-between p-1 hover:bg-gray-100 cursor-pointer h-full w-full"
+      onClick={handleThumbnailClick}
+      className="calendar-day flex flex-col items-stretch justify-between p-1 hover:bg-gray-100 cursor-pointer h-full w-full max-w-[150px] max-h-[150px] overflow-hidden"
     >
       <div className="text-xs sm:text-sm font-semibold">{day}</div>
-      <div className="flex-grow flex items-center justify-center mt-1">
+      <div className="flex-grow flex items-center justify-center overflow-hidden aspect-square">
         {thumbnails.length > 0 ? (
           <img
-            src={thumbnails[0].filePath} // 첫 번째 썸네일만 표시
+            src={thumbnails[0].filePath ? thumbnails[0].filePath : '/default-thumbnail.jpg'}
             alt={`썸네일 ${day}`}
-            className="w-full h-full object-contain border border-gray-300"
+            className="w-full h-full object-cover border border-gray-300" 
           />
         ) : (
           <div className="w-full h-full bg-gray-200 border border-gray-300"></div>
