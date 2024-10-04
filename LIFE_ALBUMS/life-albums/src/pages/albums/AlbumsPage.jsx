@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as faHeartFilled } from '@fortawesome/free-solid-svg-icons'; // 채워진 하트
@@ -33,6 +34,10 @@ const AlbumsPage = () => {
   const [rotationClasses, setRotationClasses] = useState({});
   const navigate = useNavigate();
   const { albumNo } = useParams();
+  const location = useLocation();
+
+  const selectedDay = location.state?.selectedDay; // 전달된 상태 가져오기
+  console.log("선택된 날짜:", selectedDay); // 확인용 로그 추가
 
   // 페이지가 처음 로드될 때 localStorage에서 저장된 앨범 번호 가져오기
   useEffect(() => {
@@ -89,18 +94,24 @@ const AlbumsPage = () => {
 
   // 앨범 선택 시 썸네일을 불러오는 함수
   const fetchThumbnails = async (albumNo) => {
-    setLoading(true);  // 로딩 시작
+    setLoading(true);
     try {
       const data = await thumbnails(albumNo, userInfo.accessToken);
-      console.log('썸네일 API 응답 데이터:', data);
-      setCurrentAlbum(data.thumbnails || []);  // 응답 데이터를 currentAlbum에 설정
+      console.log('썸네일 API 응답 데이터:', data); // 응답 데이터 확인
+      if (data && data.thumbnails) {
+        setCurrentAlbum(data.thumbnails);
+      } else {
+        console.error('썸네일 데이터가 없습니다.');
+        setCurrentAlbum([]);
+      }
     } catch (err) {
-      setError(err.message);  // 에러 메시지 설정
+      setError(err.message);
       console.error('썸네일 불러오기 오류:', err);
     } finally {
-      setLoading(false);  // 로딩 끝
+      setLoading(false);
     }
   };
+  
 
   // 즐겨찾기 상태 토글 함수
   const handleToggleStar = async (fileNo, token) => {
@@ -152,30 +163,40 @@ const AlbumsPage = () => {
 
   // 캘린더 아이콘 클릭 시 썸네일을 불러오는 함수
   const celendarFetchThumbnails = async (albumNo, dateArray) => {
-    console.log(dateArray); // 선택된 날짜 배열 확인
+      console.log(dateArray); // 선택된 날짜 배열 확인
 
-    setLoading(true); // 로딩 시작
-    try {
-      const [year, month, day] = dateArray; // 배열 구조 분해
-      const baseUrl = `/fileApi/dateThumbnails/${albumNo}`;
-      const params = new URLSearchParams({
-        year: year,
-        month: month,
-        day: day
-      });
-      const url = `${baseUrl}?${params}`;
+      // 날짜가 유효한지 확인
+      const [year, month, day] = dateArray;
+      if (!year || !month || !day) {
+          console.warn("유효한 날짜를 선택해 주세요.");
+          return; // 날짜가 유효하지 않으면 함수 종료
+      }
 
-      const response = await fetch(url);
-      const data = await response.json();
-      console.log("썸네일 API 응답 데이터:", data);
-      setCurrentAlbum(data.thumbnails || []); // 응답 데이터를 currentAlbum에 저장
-    } catch (err) {
-      setError(err.message); // 에러 메시지 저장
-      console.error("썸네일 불러오기 오류:", err);
-    } finally {
-      setLoading(false); // 로딩 끝
-    }
+      setLoading(true); // 로딩 시작
+      try {
+          const baseUrl = `/fileApi/dateThumbnails/${albumNo}`;
+          const params = new URLSearchParams({
+              year: year,
+              month: month,
+              day: day
+          });
+          const url = `${baseUrl}?${params}`;
+
+          const response = await fetch(url);
+          if (!response.ok) {
+              throw new Error(`Error: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log("썸네일 API 응답 데이터:", data);
+          setCurrentAlbum(data.thumbnails || []); // 응답 데이터를 currentAlbum에 저장
+      } catch (err) {
+          setError(err.message); // 에러 메시지 저장
+          console.error("썸네일 불러오기 오류:", err);
+      } finally {
+          setLoading(false); // 로딩 끝
+      }
   };
+
 
   // 캘린더 아이콘 클릭 시 날짜 선택기 표시
   const handleCalendarIconClick = (e) => {
@@ -277,6 +298,7 @@ const AlbumsPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false); // 모달 닫기
   };
+  
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-116px)] relative">
@@ -343,6 +365,7 @@ const AlbumsPage = () => {
                 </div>
               )}
             </div>
+
   
             {/* 오른쪽 화살표 버튼 */}
             <NavigationButton

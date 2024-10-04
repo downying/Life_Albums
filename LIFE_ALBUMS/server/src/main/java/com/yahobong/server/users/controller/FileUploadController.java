@@ -82,17 +82,18 @@ public class FileUploadController {
         return ResponseEntity.ok(response);
     }
 
-    // 캘린더 아이콘 data로 thumbnail
-    @GetMapping("/dateThumbnails")
+    // 캘린더 아이콘으로 특정 앨범의 날짜별 사진 가져오기
+    @GetMapping("/dateThumbnails/{albumNo}")
     public ResponseEntity<?> getDataThumbnails(
+            @PathVariable int albumNo,
             @RequestParam int year,
             @RequestParam int month,
-            @RequestParam int day) { // albumNo 매개변수 제거
+            @RequestParam int day) {
 
-        log.info("Year: {}, Month: {}, Day: {}", year, month, day);
+        log.info("앨범 번호: {}, Year: {}, Month: {}, Day: {}", albumNo, year, month, day);
 
         // 해당 날짜의 사진을 가져옴
-        List<FileDTO> thumbnails = fileService.getDateThumbnailsByDate(year, month, day);
+        List<FileDTO> thumbnails = fileService.getDateThumbnailsByDate(albumNo, year, month, day);
         
         // 별이 있는 사진과 없는 사진을 분리
         List<FileDTO> starPhotos = thumbnails.stream()
@@ -112,7 +113,6 @@ public class FileUploadController {
         return ResponseEntity.ok(response);
     }
 
-    
 
     // 특정 fileNo로 파일 정보 가져오기
     @GetMapping("/{fileNo}")
@@ -178,19 +178,19 @@ public class FileUploadController {
     }
 
     // 해당 날짜의 사진을 가져오는 메소드
-    @GetMapping("/photos")
-    public ResponseEntity<List<FileDTO>> getPhotosByDate(
-            @RequestParam int year,
-            @RequestParam int month,
-            @RequestParam int day) {
+    // @GetMapping("/photos")
+    // public ResponseEntity<List<FileDTO>> getPhotosByDate(
+    //         @RequestParam int year,
+    //         @RequestParam int month,
+    //         @RequestParam int day) {
 
-        log.info("연도: {}, 월: {}, 일: {}", year, month, day);
+    //     log.info("연도: {}, 월: {}, 일: {}", year, month, day);
         
-        // 해당 날짜의 사진을 star 우선으로 가져오기
-        List<FileDTO> photos = fileService.getDateThumbnailsByDate(year, month, day);
+    //     // 해당 날짜의 사진을 star 우선으로 가져오기
+    //     List<FileDTO> photos = fileService.getDateThumbnailsByDate(year, month, day);
         
-        return ResponseEntity.ok(photos);
-    }
+    //     return ResponseEntity.ok(photos);
+    // }
 
     // 캘린더로 보기 - 다운
     @GetMapping("/calendar/{userNo}")

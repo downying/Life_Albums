@@ -50,37 +50,29 @@ useEffect(() => {
 
   // 전체 앨범 클릭 시 썸네일 조회
   const handleAllAlbumsClick = () => {
-
-    setIsAllAlbumsActive(true);
-    setSelectedAlbumNo(null);
-    setCurrentAlbumNo(null);
-    fetchAllThumbnails();
-
-      console.log("전체 앨범 클릭됨");
-      console.log("userInfo:", userInfo);
-
-      if (userInfo && userInfo.userNo && userInfo.accessToken) {
-          console.log("allThumbnails 호출 준비 완료");
-          setIsAllAlbumsActive(true); // 전체 앨범이 선택되었음을 표시
-          setSelectedAlbumNo(null); // 선택된 앨범 해제
-          setCurrentAlbumNo(null); // 현재 앨범 선택 해제
-          fetchAllThumbnails();
-      } else {
-          console.log("사용자 정보가 없습니다."); // userInfo가 없는 경우 로그 출력
-      }
-
+    if (userInfo && userInfo.userNo) {
+      setIsAllAlbumsActive(true); // 전체 앨범이 선택되었음을 표시
+      setSelectedAlbumNo(null);   // 선택된 앨범 해제
+      setCurrentAlbumNo(null);    // 현재 앨범 선택 해제
+      fetchAllThumbnails();       // 전체 앨범의 썸네일 불러오기
+  
+      // 전체 앨범일 경우 사용자의 userNo를 포함한 경로로 이동
+      navigate(`/albums/users/${userInfo.userNo}`);
+    } else {
+      console.log("사용자 정보가 없습니다.");
+    }
   };
 
-
   const handleAlbumClick = (albumNo) => {
-
     setIsAllAlbumsActive(false); // 전체 앨범 비활성화
-    setSelectedAlbumNo(albumNo);
-    setCurrentAlbumNo(albumNo);  // currentAlbumNo 설정
-    fetchThumbnails(albumNo);     // 썸네일을 먼저 불러온 후
-    onSelectAlbum(albumNo);       // 앨범 선택 처리
-    navigate(`/albums/${albumNo}`); // 앨범 페이지로 이동
-  };  
+    setSelectedAlbumNo(albumNo); // 선택된 앨범 번호 설정
+    setCurrentAlbumNo(albumNo);  // 현재 앨범 번호 설정
+    fetchThumbnails(albumNo);    // 해당 앨범의 썸네일 불러오기
+    onSelectAlbum(albumNo);      // 앨범 선택 처리
+  
+    // 특정 앨범일 경우 앨범 번호를 포함한 경로로 이동
+    navigate(`/albums/${albumNo}`);
+  };
 
    // currentAlbumNo가 업데이트될 때마다 썸네일 조회
    useEffect(() => {
@@ -186,6 +178,12 @@ useEffect(() => {
     console.log('캘린더로 보기 버튼 클릭됨!!!!!!!!', userInfo);
     navigate('/calendar', { state: { userInfo } });
   };
+
+  useEffect(() => {
+    console.log('현재 앨범 번호:', currentAlbumNo);
+    console.log('사이드바에서 선택한 앨범:', currentAlbum);
+  }, [currentAlbumNo, currentAlbum]); // 상태가 업데이트될 때마다 확인
+  
     
   return (
     <div className="w-64 bg-white text-black p-4 flex flex-col justify-between">

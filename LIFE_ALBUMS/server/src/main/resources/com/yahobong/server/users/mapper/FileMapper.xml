@@ -46,7 +46,8 @@
         FROM 
             files f
         WHERE 
-            f.year = #{year}
+            f.albumsNo = #{albumsNo} 
+            AND f.year = #{year}
             AND f.month = #{month}
             AND f.day = #{day}
         ORDER BY 

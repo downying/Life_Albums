@@ -61,9 +61,9 @@ public class FileService {
     }
 
     @Transactional
-    public List<FileDTO> getDateThumbnailsByDate(int year, int month, int day) {
-        // 해당 날짜의 사진을 가져옴
-        List<FileDTO> photos = fileMapper.getDateThumbnailsByDate(year, month, day);
+    public List<FileDTO> getDateThumbnailsByDate(int albumsNo, int year, int month, int day) {
+        // 해당 앨범 및 날짜의 사진을 가져옴
+        List<FileDTO> photos = fileMapper.getDateThumbnailsByDate(albumsNo, year, month, day);
         
         // star가 있는 사진을 우선적으로 정렬
         return photos.stream()
@@ -75,7 +75,6 @@ public class FileService {
             })
             .collect(Collectors.toList());
     }
-
 
     @Transactional
     public List<FileDTO> getStarThumbnailsByAlbumNo(int albumsNo, int page, int size) {
