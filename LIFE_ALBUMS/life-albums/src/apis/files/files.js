@@ -139,25 +139,25 @@ export const toggleStar = async (fileNo, token) => {
 };
 
 // 날짜에 맞는 사진 가져오기
-// export const getDateThumbnails = async (year, month, day, token) => {
-//   try {
-//     const response = await api.get(`/fileApi/dateThumbnails`, {
-//       headers: {
-//         Authorization: `Bearer ${token}`, // 인증 헤더 추가
-//       },
-//       params: {
-//         year,
-//         month,
-//         day,
-//       },
-//     });
-//     console.log("getDateThumbnails API의 응답:", response.data);
-//     return response.data; // 반환된 데이터
-//   } catch (error) {
-//     console.error("날짜 사진 가져오기 중 오류:", error);
-//     throw error; // 에러 발생
-//   }
-// };
+export const getDateThumbnails = async (year, month, day, token) => {
+  try {
+    const response = await api.get(`/fileApi/dateThumbnails`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // 인증 헤더 추가
+      },
+      params: {
+        year,
+        month,
+        day,
+      },
+    });
+    console.log("getDateThumbnails API의 응답:", response.data);
+    return response.data; // 반환된 데이터
+  } catch (error) {
+    console.error("날짜 사진 가져오기 중 오류:", error);
+    throw error; // 에러 발생
+  }
+};
 
 export const getThumbnailsByUserAndDate = async (userNo, year, month, day, token) => {
   try {

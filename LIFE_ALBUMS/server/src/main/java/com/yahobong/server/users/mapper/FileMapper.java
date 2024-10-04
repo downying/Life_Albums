@@ -17,8 +17,10 @@ public interface FileMapper {
             @Param("limit") int limit);
 
     // 날짜에 따른 썸네일 조회 
-    List<FileDTO> getDateThumbnailsByDate(@Param("year") int year, @Param("month") int month, @Param("day") int day);
-
+    List<FileDTO> getDateThumbnailsByDate(@Param("albumsNo") int albumsNo, 
+                                        @Param("year") int year, 
+                                        @Param("month") int month, 
+                                        @Param("day") int day);
 
     // 즐겨찾기 썸네일 조회
     List<FileDTO> getStarThumbnailsByAlbumNo(@Param("albumsNo") int albumsNo, @Param("offset") int offset,
