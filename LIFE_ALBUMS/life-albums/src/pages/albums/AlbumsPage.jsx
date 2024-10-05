@@ -27,6 +27,7 @@ const AlbumsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열림 상태
   const [currentAlbumNo, setCurrentAlbumNo] = useState(null); // 선택된 앨범 번호
   const [currentAlbum, setCurrentAlbum] = useState([]); // 현재 앨범의 썸네일 리스트
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true); // 로딩 상태
   const [error, setError] = useState(null); // 에러 상태
   const [check, setCheck] = useState(false); // 체크 상태 추가
@@ -41,25 +42,25 @@ const AlbumsPage = () => {
 
   // 페이지가 처음 로드될 때 localStorage에서 저장된 앨범 번호 가져오기
   useEffect(() => {
-      // userInfo가 없을 때 바로 리턴
-      if (!userInfo || !userInfo.accessToken) {
-          console.log("사용자 정보가 없습니다.");
-          return;
-      }
+    // userInfo가 없을 때 바로 리턴
+    if (!userInfo || !userInfo.accessToken) {
+      console.log("사용자 정보가 없습니다.");
+      return;
+    }
 
-      const storedAlbumNo = localStorage.getItem("selectedAlbumNo");
+    const storedAlbumNo = localStorage.getItem("selectedAlbumNo");
 
-      if (storedAlbumNo) {
-          setCurrentAlbumNo(storedAlbumNo);
-          if (showDatePicker) {
-              celendarFetchThumbnails(storedAlbumNo, dataStartDate);
-          } else {
-              fetchThumbnails(storedAlbumNo);
-          }
+    if (storedAlbumNo) {
+      setCurrentAlbumNo(storedAlbumNo);
+      if (showDatePicker) {
+        celendarFetchThumbnails(storedAlbumNo, dataStartDate);
       } else {
-          fetchAllThumbnails();
+        fetchThumbnails(storedAlbumNo);
       }
-  }, [userInfo, showDatePicker, dataStartDate]);
+    } else {
+      fetchAllThumbnails();
+    }
+  }, [userInfo, showDatePicker, dataStartDate, currentPage]);
 
   // Sidebar에서 선택된 앨범 번호를 받아와 상태를 업데이트하고 localStorage에 저장
   const handleSelectAlbum = (albumNo) => {
@@ -80,7 +81,7 @@ const AlbumsPage = () => {
 
     try {
       console.log('전체 앨범 썸네일을 불러오는 중...');
-      const data = await allThumbnails(userInfo.userNo, userInfo.accessToken);
+      const data = await allThumbnails(userInfo.userNo, userInfo.accessToken, currentPage, albumsPerPage);
       console.log('전체 앨범 썸네일 데이터:', data);
       setCurrentAlbum(data.photos || []);
       setCurrentPage(1);
@@ -96,10 +97,11 @@ const AlbumsPage = () => {
   const fetchThumbnails = async (albumNo) => {
     setLoading(true);
     try {
-      const data = await thumbnails(albumNo, userInfo.accessToken);
+      const data = await thumbnails(albumNo, userInfo.accessToken, currentPage, albumsPerPage);
       console.log('썸네일 API 응답 데이터:', data); // 응답 데이터 확인
       if (data && data.thumbnails) {
         setCurrentAlbum(data.thumbnails);
+        setData(data)
       } else {
         console.error('썸네일 데이터가 없습니다.');
         setCurrentAlbum([]);
@@ -111,12 +113,12 @@ const AlbumsPage = () => {
       setLoading(false);
     }
   };
-  
+
 
   // 즐겨찾기 상태 토글 함수
   const handleToggleStar = async (fileNo, token) => {
     try {
-      const response = await toggleStar(fileNo, token); // 즐겨찾기 토글 API 호출
+      const response = await toggleStar(fileNo, token,); // 즐겨찾기 토글 API 호출
       console.log("Response from toggleStar API:", response);
       // 상태 업데이트: 특정 fileNo의 star 상태를 업데이트
       setCurrentAlbum((prevAlbum) =>
@@ -131,7 +133,7 @@ const AlbumsPage = () => {
       console.error("즐겨찾기 상태 변경 중 오류 발생:", error);
     }
   };
-  
+
   // 즐겨찾기 클릭 시 썸네일을 불러오는 함수
   const starFetchThumbnails = async (albumNo) => {
     setLoading(true); // 로딩 시작
@@ -163,38 +165,38 @@ const AlbumsPage = () => {
 
   // 캘린더 아이콘 클릭 시 썸네일을 불러오는 함수
   const celendarFetchThumbnails = async (albumNo, dateArray) => {
-      console.log(dateArray); // 선택된 날짜 배열 확인
+    console.log(dateArray); // 선택된 날짜 배열 확인
 
-      // 날짜가 유효한지 확인
-      const [year, month, day] = dateArray;
-      if (!year || !month || !day) {
-          console.warn("유효한 날짜를 선택해 주세요.");
-          return; // 날짜가 유효하지 않으면 함수 종료
+    // 날짜가 유효한지 확인
+    const [year, month, day] = dateArray;
+    if (!year || !month || !day) {
+      console.warn("유효한 날짜를 선택해 주세요.");
+      return; // 날짜가 유효하지 않으면 함수 종료
+    }
+
+    setLoading(true); // 로딩 시작
+    try {
+      const baseUrl = `/fileApi/dateThumbnails/${albumNo}`;
+      const params = new URLSearchParams({
+        year: year,
+        month: month,
+        day: day
+      });
+      const url = `${baseUrl}?${params}`;
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
       }
-
-      setLoading(true); // 로딩 시작
-      try {
-          const baseUrl = `/fileApi/dateThumbnails/${albumNo}`;
-          const params = new URLSearchParams({
-              year: year,
-              month: month,
-              day: day
-          });
-          const url = `${baseUrl}?${params}`;
-
-          const response = await fetch(url);
-          if (!response.ok) {
-              throw new Error(`Error: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log("썸네일 API 응답 데이터:", data);
-          setCurrentAlbum(data.thumbnails || []); // 응답 데이터를 currentAlbum에 저장
-      } catch (err) {
-          setError(err.message); // 에러 메시지 저장
-          console.error("썸네일 불러오기 오류:", err);
-      } finally {
-          setLoading(false); // 로딩 끝
-      }
+      const data = await response.json();
+      console.log("썸네일 API 응답 데이터:", data);
+      setCurrentAlbum(data.thumbnails || []); // 응답 데이터를 currentAlbum에 저장
+    } catch (err) {
+      setError(err.message); // 에러 메시지 저장
+      console.error("썸네일 불러오기 오류:", err);
+    } finally {
+      setLoading(false); // 로딩 끝
+    }
   };
 
 
@@ -235,7 +237,7 @@ const AlbumsPage = () => {
       await updateFile(fileNo, updatedFile, userInfo.accessToken); // 파일 업데이트 API 호출
       console.log("파일이 업데이트되었습니다.");
 
-      setCurrentAlbum((prev) => prev.map(photo => 
+      setCurrentAlbum((prev) => prev.map(photo =>
         photo.fileNo === fileNo ? { ...photo, date: updatedFile.date } : photo
       )); // 업데이트된 사진 상태 변경
     } catch (error) {
@@ -246,32 +248,33 @@ const AlbumsPage = () => {
   // 사진을 등록하는 함수
   const handleRegisterAlbum = async (newAlbum) => {
     if (!currentAlbumNo) {
-        alert("앨범을 선택해 주세요."); // 앨범 미선택 시 경고
-        return;
+      alert("앨범을 선택해 주세요."); // 앨범 미선택 시 경고
+      return;
     }
 
     try {
-        const formData = new FormData();
-        formData.append('file', newAlbum.file);
-        formData.append('data', JSON.stringify({
-            albumsNo: currentAlbumNo,
-            content: newAlbum.memo,
-            year: new Date(newAlbum.date).getFullYear(),
-            month: new Date(newAlbum.date).getMonth() + 1,
-            day: new Date(newAlbum.date).getDate(),
-            star: false,
-        }));
+      const formData = new FormData();
+      formData.append('file', newAlbum.file);
+      formData.append('data', JSON.stringify({
+        albumsNo: currentAlbumNo,
+        content: newAlbum.memo,
+        year: new Date(newAlbum.date).getFullYear(),
+        month: new Date(newAlbum.date).getMonth() + 1,
+        day: new Date(newAlbum.date).getDate(),
+        star: false,
+      }));
 
-        const result = await fileInsert(formData, userInfo.accessToken); // 사진 등록 API 호출
-        console.log('사진 등록 성공:', result);
-        await fetchThumbnails(currentAlbumNo); // 변경된 사항 반영
+      const result = await fileInsert(formData, userInfo.accessToken); // 사진 등록 API 호출
+      console.log('사진 등록 성공:', result);
+      await fetchThumbnails(currentAlbumNo); // 변경된 사항 반영
     } catch (error) {
-        console.error('사진 등록 실패:', error);
+      console.error('사진 등록 실패:', error);
     }
   };
 
   // 총 페이지 수 계산
-  const totalPages = Math.ceil(currentAlbum.length / albumsPerPage);
+  const totalPages = Math.ceil(data.totalItems / albumsPerPage);
+
 
   const onPageChange = (pageNumber) => {
     if (pageNumber > 0 && pageNumber <= totalPages) {
@@ -280,15 +283,16 @@ const AlbumsPage = () => {
   };
 
   // 현재 페이지의 사진을 계산
-  const currentPhotos = currentAlbum.slice(
-    (currentPage - 1) * albumsPerPage,
-    currentPage * albumsPerPage
-  );
+  // const currentPhotos = currentAlbum.slice(
+  //   (currentPage - 1) * albumsPerPage,
+  //   currentPage * albumsPerPage
+  // );
 
   // 'Add Photo' 버튼 위치 결정
-  const addPhotoButtonPosition = currentPhotos.length < 2
-    ? (currentPhotos.length === 0 ? 'left' : 'right')
+  const addPhotoButtonPosition = data.thumbnails.length === 0 || data.thumbnails.length === 1
+    ? (data.thumbnails.length === 0 ? 'left' : 'right')
     : 'none';
+
 
   const handleNoImageClick = () => {
     setIsModalOpen(true);
@@ -298,7 +302,8 @@ const AlbumsPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false); // 모달 닫기
   };
-  
+
+  console.log('현재 페이지에서 보여줄 사진 목록:', data.thumbnails);
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-116px)] relative">
@@ -313,13 +318,13 @@ const AlbumsPage = () => {
           setIsAllAlbumsActive={setIsAllAlbumsActive}  // 상태를 업데이트하는 함수도 전달
         />
         <div className="content-area">
-        {/* 오른쪽 상단 부분 렌더링 */}
-        {!isAllAlbumsActive && (
-          <div className="right-side-icons">
-            {/* 캘린더 아이콘, 하트 아이콘, 사진 추가 버튼 등 */}
-          </div>
-        )}
-      </div>
+          {/* 오른쪽 상단 부분 렌더링 */}
+          {!isAllAlbumsActive && (
+            <div className="right-side-icons">
+              {/* 캘린더 아이콘, 하트 아이콘, 사진 추가 버튼 등 */}
+            </div>
+          )}
+        </div>
 
         <div className="flex-grow flex flex-col items-center justify-center bg-gray-100 p-4">
           <div className="relative flex items-center justify-center w-[80%] h-[95%]">
@@ -329,11 +334,11 @@ const AlbumsPage = () => {
               onClick={() => console.log('Left Clicked')}
               className="absolute left-[-40px] md:left-[-60px] top-[50%] transform -translate-y-1/2 text-5xl md:text-7xl text-black z-10 bg-white p-2 md:p-4 rounded-full shadow-lg"
             />
-  
+
             {/* 앨범 UI */}
             <div className="relative w-full h-full bg-white border-2 md:border-4 border-black rounded-[10px] md:rounded-[20px] shadow-lg md:shadow-2xl flex overflow-hidden z-10">
-              {currentPhotos.length > 0 ? (
-                currentPhotos.map((photo, index) => (
+              {data && data.thumbnails && data.thumbnails.length > 0 ? (
+                data.thumbnails.map((photo, index) => (
                   <div key={index} className="relative w-full sm:w-1/2 h-full bg-white flex flex-col justify-center items-center p-4 md:p-6">
                     <img
                       src={photo.filePath}
@@ -366,7 +371,7 @@ const AlbumsPage = () => {
               )}
             </div>
 
-  
+
             {/* 오른쪽 화살표 버튼 */}
             <NavigationButton
               direction="right"
@@ -374,7 +379,7 @@ const AlbumsPage = () => {
               className="absolute right-[-60px] top-[50%] transform -translate-y-1/2 text-7xl text-black z-10 bg-white p-4 rounded-full shadow-lg"
             />
           </div>
-  
+
           {/* 상단 오른쪽 부분 */}
           {!isAllAlbumsActive && (
             <div className="absolute right-12 top-8 flex flex-col items-start space-y-4 z-10">

@@ -37,7 +37,7 @@ const Pagination = ({ totalPages, currentPage, onPageChange }) => {
             currentPage === number
               ? 'bg-black text-white border-black'
               : 'bg-white text-black border-gray-300 hover:bg-gray-200'
-          } ${number > 1 && 'hidden'}`}  // 현재는 첫 번째 페이지만 보이게
+          } `}  
         >
           {number}
         </button>
