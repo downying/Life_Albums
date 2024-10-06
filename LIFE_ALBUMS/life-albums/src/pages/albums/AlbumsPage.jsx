@@ -289,9 +289,11 @@ const AlbumsPage = () => {
   // );
 
   // 'Add Photo' 버튼 위치 결정
-  const addPhotoButtonPosition = data.thumbnails.length === 0 || data.thumbnails.length === 1
-    ? (data.thumbnails.length === 0 ? 'left' : 'right')
-    : 'none';
+  const addPhotoButtonPosition = !data || !data.thumbnails 
+    ? 'none' 
+    : (data.thumbnails.length === 0 ? 'left' 
+    : (data.thumbnails.length === 1 ? 'right' : 'none'));
+
 
 
   const handleNoImageClick = () => {
